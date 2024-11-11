@@ -1,0 +1,3 @@
+User-agent: *
+Disallow:
+Sitemap: https://liu-yii.github.io/blogs/sitemap.xml
