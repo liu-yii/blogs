@@ -4,19 +4,15 @@
     <title>Posts on yi&#39;s blog</title>
     <link>http://localhost:1313/blogs/posts/</link>
     <description>Recent content in Posts on yi&#39;s blog</description>
+    <image>
+      <title>yi&#39;s blog</title>
+      <url>http://localhost:1313/blogs/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</url>
+      <link>http://localhost:1313/blogs/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
+    </image>
     <generator>Hugo -- 0.138.0</generator>
     <language>en</language>
-    <lastBuildDate>Thu, 14 Nov 2024 15:46:50 +0800</lastBuildDate>
+    <lastBuildDate>Thu, 14 Nov 2024 13:46:50 +0800</lastBuildDate>
     <atom:link href="http://localhost:1313/blogs/posts/index.xml" rel="self" type="application/rss+xml" />
-    <item>
-      <title>Diffusion Priors</title>
-      <link>http://localhost:1313/blogs/posts/2024-11-14-diffusion-priors/</link>
-      <pubDate>Thu, 14 Nov 2024 15:46:50 +0800</pubDate>
-      <guid>http://localhost:1313/blogs/posts/2024-11-14-diffusion-priors/</guid>
-      <description>&lt;h2 id=&#34;diffusion-models-as-plug-and-play-priors&#34;&gt;Diffusion models as plug-and-play priors&lt;/h2&gt;
-&lt;p&gt;之前不是很懂diffusion prior的意思，直到最近看到了这篇文章，Diffusion models as plug-and-play priors (NIPS2022)&lt;/p&gt;
-&lt;p&gt;文章的思路比较有意思，提出了预训练的扩散生成模型(e.g. Stable Diffusion)是可以作为一个plug-and-play的模块直接使用的。这样我们在使用的时候也不需要对模型进行训练或者微调，这就大大减少了训练成本。这种方法跟我们的先验知识一样，所以也叫扩散先验diffusion prior。&lt;/p&gt;</description>
-    </item>
     <item>
       <title>Diffusion Models</title>
       <link>http://localhost:1313/blogs/posts/2024-11-14-diffusion-models/</link>
@@ -68,15 +64,6 @@ $$
 \end{align}
 $$&lt;p&gt;因此KL散度为：
 &lt;/p&gt;</description>
-    </item>
-    <item>
-      <title>2024 11 11</title>
-      <link>http://localhost:1313/blogs/posts/2024-11-11/</link>
-      <pubDate>Mon, 11 Nov 2024 13:46:50 +0800</pubDate>
-      <guid>http://localhost:1313/blogs/posts/2024-11-11/</guid>
-      <description>&lt;h2 id=&#34;introduction&#34;&gt;Introduction&lt;/h2&gt;
-&lt;p&gt;This is &lt;strong&gt;bold&lt;/strong&gt; text, and this is &lt;em&gt;emphasized&lt;/em&gt; text.&lt;/p&gt;
-&lt;p&gt;Visit the &lt;a href=&#34;https://gohugo.io&#34;&gt;Hugo&lt;/a&gt; website!&lt;/p&gt;</description>
     </item>
   </channel>
 </rss>
