@@ -2,11 +2,14 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
+    <loc>http://localhost:1313/blogs/posts/2024-11-18-x-restormer/</loc>
+    <lastmod>2024-11-18T15:06:13+08:00</lastmod>
+  </url><url>
     <loc>http://localhost:1313/blogs/posts/</loc>
-    <lastmod>2024-11-14T15:46:50+08:00</lastmod>
+    <lastmod>2024-11-18T15:06:13+08:00</lastmod>
   </url><url>
     <loc>http://localhost:1313/blogs/</loc>
-    <lastmod>2024-11-14T15:46:50+08:00</lastmod>
+    <lastmod>2024-11-18T15:06:13+08:00</lastmod>
   </url><url>
     <loc>http://localhost:1313/blogs/posts/2024-11-14-diffusion-models/</loc>
     <lastmod>2024-11-14T13:46:50+08:00</lastmod>

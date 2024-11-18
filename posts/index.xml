@@ -11,8 +11,43 @@
     </image>
     <generator>Hugo -- 0.138.0</generator>
     <language>en</language>
-    <lastBuildDate>Thu, 14 Nov 2024 13:46:50 +0800</lastBuildDate>
+    <lastBuildDate>Mon, 18 Nov 2024 15:06:13 +0800</lastBuildDate>
     <atom:link href="http://localhost:1313/blogs/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>2024-11-18 X-Restormer</title>
+      <link>http://localhost:1313/blogs/posts/2024-11-18-x-restormer/</link>
+      <pubDate>Mon, 18 Nov 2024 15:06:13 +0800</pubDate>
+      <guid>http://localhost:1313/blogs/posts/2024-11-18-x-restormer/</guid>
+      <description>&lt;h2 id=&#34;daily-paper-001&#34;&gt;Daily Paper 001&lt;/h2&gt;
+&lt;p&gt;今天是每日一篇论文计划实施的第一天，主要是为了激励自己看论文(论文看得太少了😭).&lt;/p&gt;
+&lt;h2 id=&#34;title-a-comparative-study-of-image-restoration-networks-for-general-backbone-network-design-eccv-2024&#34;&gt;Title: A Comparative Study of Image Restoration Networks for General Backbone Network Design (ECCV 2024)&lt;/h2&gt;
+&lt;h3 id=&#34;codehttpsgithubcomandrew0613x-restormer&#34;&gt;&lt;a href=&#34;https://github.com/Andrew0613/X-Restormer&#34;&gt;code&lt;/a&gt;&lt;/h3&gt;
+&lt;h3 id=&#34;heading&#34;&gt;⭐⭐⭐&lt;/h3&gt;
+&lt;h3 id=&#34;abstract&#34;&gt;Abstract&lt;/h3&gt;
+&lt;p&gt;文章主要对之前的通用图像修复框架(i.e. MPRNet, NAFNet, SwinIR, Restormer, Uformer)进行了任务通用性分析，指出在某个任务(SR)上表现好的方法在其他任务上表现往往逊色于其他方法。
+针对这一问题，文章设计了一种新的通用图像复原Backbone。&lt;/p&gt;
+&lt;h3 id=&#34;introduction&#34;&gt;Introduction&lt;/h3&gt;
+&lt;p&gt;首先造成图像复原框架任务表现差异性的主要原因在于，不同的图像修复任务所涉及的退化特征不同。文章选取了image SR, denoising, deblurring, deraining和dehazing五类任务(他们的退化特性各不相同)进行了五种backbone的通用性分析， 这五种backbone又可以分为三类经典的框架，U-Net框架(Uformer, Restormer), 残差框架(SwinIR, NAFNet), 多阶段渐进式框架(MPRNet). 并且还包含了卷积，空间自注意力(spatial self-attention)，转置自注意力(transposed self-attention).
+&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/blogs/blogs/posts/2024-11-18-x-restormer/img/fig1.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;图中可以看到Restormer在各项任务的表现都较好，因此作者对Restormer的结构优势进行了分析：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Restormer的U-Net架构可以处理大尺寸的输入，对于处理大区域的退化是必要的&lt;/li&gt;
+&lt;li&gt;Restormer的转置自注意力(transposed self-attention)利用channel-wise feature作为token，实现了channel之间的信息交互和全局感受野的映射&lt;/li&gt;
+&lt;li&gt;depth-wise conv也激活了网络的空间信息交互能力&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;而Restormer的缺陷在于其空间映射能力不足，以至于在SR任务上稍逊于SwinIR。作者也对其进行了分析，认为这种不足来自于&lt;strong&gt;UNet架构自身的对于细节重建的缺陷&lt;/strong&gt;以及&lt;strong&gt;depth-wise conv相对于空间自注意力的较弱的空间映射能力&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;因此一个很好的方法是在Restormer中加入空间自注意力，用HAT中的overlapping cross-attention blocks替换一半的transposed self-attention.&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;(其实感觉文章的创新性并不高，无非又是缝合模块, 主要还是得把文章的故事讲好！！！！)&lt;/em&gt; 🧐&lt;/p&gt;
+&lt;h3 id=&#34;related-work&#34;&gt;Related Work&lt;/h3&gt;
+&lt;p&gt;related work就先不放在这里了，占篇幅，hhhhh。主要是介绍了图像复原网络领域内之前的工作，然后另外用了一节解释了文章的方法更侧重于不同领域的通用性设计，与其他方法不同。&lt;/p&gt;
+&lt;h3 id=&#34;benchmark&#34;&gt;Benchmark&lt;/h3&gt;
+&lt;p&gt;这里首先分析了上文中提到的五类图像复原任务的退化模型，包括：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;image Super-Resolution&lt;/p&gt;
+&lt;p&gt;$ I_{GT} \in \mathbb{R}^{H\times W\times 3}$表示ground truth image，$ I_{LQ} \in \mathbb{R}^{h\times w\times 3}$表示退化图像. 图像超分辨率任务的退化模型就可以表示为：
+&lt;/p&gt;</description>
+    </item>
     <item>
       <title>Diffusion Models</title>
       <link>http://localhost:1313/blogs/posts/2024-11-14-diffusion-models/</link>
