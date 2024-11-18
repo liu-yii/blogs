@@ -1,0 +1,79 @@
+<!doctype html><html lang=en dir=auto><head><script src="/blogs/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=blogs/livereload" data-no-instant defer></script><meta charset=utf-8><meta http-equiv=X-UA-Compatible content="IE=edge"><meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no"><meta name=robots content="noindex, nofollow"><title>Diffusion Models | yi's blog</title>
+<meta name=keywords content><meta name=description content="Preliminary Knowledge
+条件概率公式
+条件概率的一般形式：
+$$ P(A,B,C)=P(C|B,A)P(B,A)=P(C|B,A)P(B|A)P(A) $$$$ P(B,C|A)=P(C|B,A)P(B|A) $$马尔可夫条件：下一状态的概率分布只能由当前状态决定，与前面的状态无关。
+基于马尔可夫条件，在马尔可夫链A->B->C中：
+
+$$ P(A,B,C)=P(C|B)P(B|A)P(A) $$$$ P(B,C|A)=P(C|B)P(B|A) $$KL散度
+KL散度是衡量两个概率分布之间差异的一种度量方法，它衡量了从一个分布到另一个分布所需的额外信息。KL散度的定义是建立在熵Entropy的基础上的，熵Entropy的定义如下：
+若一个离散随机变量$X$的可能取值为$\left [x_1,x_2,x_3,&mldr;\right ]$，它们的概率分布为$p_i=p(X=x_i)$，则$X$的熵为：
+
+$$H(X)=-\sum_{i=1}^{n}p_i\log p_i$$
+规定当$p_i=0$时，$p_i\log p_i=0$
+若有两个随机变量$X$和$Y$，它们的概率分布分别为$p(x)$和$q(x)$，则$p$和$q$的交叉熵为：
+
+$$H(p,q)=-\sum_{i=1}^{n}p(x)\log q(x)$$
+在信息论中，交叉熵可认为是对预测分布$q(x)$用真实分布$p(x)$来进行编码时所需要的信息量大小
+因此我们可以通过交叉熵和信息熵来推到相对熵即KL散度：
+$$
+\begin{align}
+D_{KL}(p||q)&=H(p,q)-H(p) \nonumber\\
+&=-\sum_{i=1}^{n}p(x)\log q(x)+\sum_{i=1}^{n}p(x)\log p(x) \nonumber\\
+&=-\sum_{i=1}^{n}p(x)\log \frac{q(x)}{p(x)} \nonumber
+\end{align}
+$$
+KL散度的特点：
+
+非对称性：$D_{KL}(p||q)\neq D_{KL}(q||p)$
+非负性：$D_{KL}(p||q)\geq 0$
+
+对于两个单一变量的高斯分布$p=\mathcal{N}(\mu_1,\sigma_1^2)$和$q=\mathcal{N}(\mu_2,\sigma_2^2)$而言，正态分布的概率密度函数为：
+
+$$
+\begin{align}
+p(x)&=\frac{1}{\sqrt{2\pi}\sigma_1}exp({-\frac{(x-\mu_1)^2}{2\sigma_1^2}}) \nonumber\\
+q(x)&=\frac{1}{\sqrt{2\pi}\sigma_2}exp({-\frac{(x-\mu_1)^2}{2\sigma_2^2}}) \nonumber
+\end{align}
+$$
+将上述的KL散度转换为连续随机变量的形式：$D_{KL}(p||q)=\int[p(x)\log(p(x))-p(x)\log(q(x))]dx$, 将概率密度函数代入分别计算两项, 具体计算过程可以参考KL divergence between two univariate Gaussians, 其中关键在于$var(x)=E(x^2)-E(x)^2, E(x^2)=\sigma^2+\mu^2$：
+
+$$
+\begin{align}
+\int p(x)\log(p(x))dx &= -\frac{1}{2}[1&#43;\log(2\pi\sigma_1^2)] \nonumber\\
+\int p(x)\log(q(x))dx &= -\frac{1}{2}\log(2\pi\sigma_2^2)-\frac{\sigma_1^2+(\mu_1-\mu_2)^2}{2\sigma_2^2} \nonumber\\
+\end{align}
+$$因此KL散度为：
+"><meta name=author content><link rel=canonical href=http://localhost:1313/blogs/posts/2024-11-14-diffusion-models/><link crossorigin=anonymous href=/blogs/assets/css/stylesheet.d6fcd20a4fb86efa4dfac8ec95da60244cc8871042183da1ef28e3a762ad79c8.css integrity="sha256-1vzSCk+4bvpN+sjsldpgJEzIhxBCGD2h7yjjp2Ktecg=" rel="preload stylesheet" as=style><link rel=icon href=http://localhost:1313/blogs/favicon.ico><link rel=icon type=image/png sizes=16x16 href=http://localhost:1313/blogs/favicon-16x16.png><link rel=icon type=image/png sizes=32x32 href=http://localhost:1313/blogs/favicon-32x32.png><link rel=apple-touch-icon href=http://localhost:1313/blogs/apple-touch-icon.png><link rel=mask-icon href=http://localhost:1313/blogs/safari-pinned-tab.svg><meta name=theme-color content="#2e2e33"><meta name=msapplication-TileColor content="#2e2e33"><link rel=alternate hreflang=en href=http://localhost:1313/blogs/posts/2024-11-14-diffusion-models/><noscript><style>#theme-toggle,.top-link{display:none}</style><style>@media(prefers-color-scheme:dark){:root{--theme:rgb(29, 30, 32);--entry:rgb(46, 46, 51);--primary:rgb(218, 218, 219);--secondary:rgb(155, 156, 157);--tertiary:rgb(65, 66, 68);--content:rgb(196, 196, 197);--code-block-bg:rgb(46, 46, 51);--code-bg:rgb(55, 56, 62);--border:rgb(51, 51, 51)}.list{background:var(--theme)}.list:not(.dark)::-webkit-scrollbar-track{background:0 0}.list:not(.dark)::-webkit-scrollbar-thumb{border-color:var(--theme)}}</style></noscript><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css integrity=sha384-nB0miv6/jRmo5UMMR1wu3Gz6NLsoTkbqJghGIsx//Rlm+ZU03BU6SQNC66uf4l5+ crossorigin=anonymous><script defer src=https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js integrity=sha384-7zkQWkzuo3B5mTepMUcHkMB5jZaolc2xDwL6VFqjFALcbeS9Ggm/Yr2r3Dy4lfFg crossorigin=anonymous></script><script defer src=https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js integrity=sha384-43gviWU0YVjaDtb/GhzOouOXtZMP/7XUzwPTstBeZFe/+rCMvRwr4yROQP43s0Xk crossorigin=anonymous></script><script>document.addEventListener("DOMContentLoaded",function(){renderMathInElement(document.body,{delimiters:[{left:"$$",right:"$$",display:!0},{left:"$",right:"$",display:!1},{left:"\\(",right:"\\)",display:!1},{left:"\\[",right:"\\]",display:!0}],throwOnError:!1})})</script></head><body id=top><script>localStorage.getItem("pref-theme")==="dark"?document.body.classList.add("dark"):localStorage.getItem("pref-theme")==="light"?document.body.classList.remove("dark"):window.matchMedia("(prefers-color-scheme: dark)").matches&&document.body.classList.add("dark")</script><header class=header><nav class=nav><div class=logo><a href=http://localhost:1313/blogs/ accesskey=h title="yi's blog (Alt + H)">yi's blog</a><div class=logo-switches><button id=theme-toggle accesskey=t title="(Alt + T)"><svg id="moon" width="24" height="18" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg><svg id="sun" width="24" height="18" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button></div></div><ul id=menu><li><a href=http://localhost:1313/blogs/categories/ title=categories><span>categories</span></a></li><li><a href=http://localhost:1313/blogs/tags/ title=tags><span>tags</span></a></li><li><a href=https://example.org title=example.org><span>example.org</span>&nbsp;<svg fill="none" shape-rendering="geometricPrecision" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" viewBox="0 0 24 24" height="12" width="12"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><path d="M15 3h6v6"/><path d="M10 14 21 3"/></svg></a></li></ul></nav></header><main class=main><article class=post-single><header class=post-header><h1 class="post-title entry-hint-parent">Diffusion Models</h1><div class=post-meta><span title='2024-11-14 13:46:50 +0800 CST'>November 14, 2024</span></div></header><div class=post-content><h2 id=preliminary-knowledge>Preliminary Knowledge<a hidden class=anchor aria-hidden=true href=#preliminary-knowledge>#</a></h2><h3 id=条件概率公式>条件概率公式<a hidden class=anchor aria-hidden=true href=#条件概率公式>#</a></h3><p>条件概率的一般形式：</p>$$ P(A,B,C)=P(C|B,A)P(B,A)=P(C|B,A)P(B|A)P(A) $$$$ P(B,C|A)=P(C|B,A)P(B|A) $$<p>马尔可夫条件：下一状态的概率分布只能由当前状态决定，与前面的状态无关。</p><p>基于马尔可夫条件，在马尔可夫链A->B->C中：</p>$$ P(A,B,C)=P(C|B)P(B|A)P(A) $$$$ P(B,C|A)=P(C|B)P(B|A) $$<h3 id=kl散度>KL散度<a hidden class=anchor aria-hidden=true href=#kl散度>#</a></h3><p>KL散度是衡量两个概率分布之间差异的一种度量方法，它衡量了从一个分布到另一个分布所需的额外信息。KL散度的定义是建立在熵Entropy的基础上的，熵Entropy的定义如下：</p><p>若一个离散随机变量$X$的可能取值为$\left [x_1,x_2,x_3,&mldr;\right ]$，它们的概率分布为$p_i=p(X=x_i)$，则$X$的熵为：</p>$$H(X)=-\sum_{i=1}^{n}p_i\log p_i$$<p>规定当$p_i=0$时，$p_i\log p_i=0$</p><p>若有两个随机变量$X$和$Y$，它们的概率分布分别为$p(x)$和$q(x)$，则$p$和$q$的交叉熵为：</p>$$H(p,q)=-\sum_{i=1}^{n}p(x)\log q(x)$$<p>在信息论中，交叉熵可认为是对预测分布$q(x)$用真实分布$p(x)$来进行编码时所需要的信息量大小</p><p>因此我们可以通过交叉熵和信息熵来推到相对熵即KL散度：</p>$$
+\begin{align}
+D_{KL}(p||q)&=H(p,q)-H(p) \nonumber\\
+&=-\sum_{i=1}^{n}p(x)\log q(x)+\sum_{i=1}^{n}p(x)\log p(x) \nonumber\\
+&=-\sum_{i=1}^{n}p(x)\log \frac{q(x)}{p(x)} \nonumber
+\end{align}
+$$<p>KL散度的特点：</p><ol><li>非对称性：$D_{KL}(p||q)\neq D_{KL}(q||p)$</li><li>非负性：$D_{KL}(p||q)\geq 0$</li></ol><p>对于两个单一变量的高斯分布$p=\mathcal{N}(\mu_1,\sigma_1^2)$和$q=\mathcal{N}(\mu_2,\sigma_2^2)$而言，正态分布的概率密度函数为：</p>$$
+\begin{align}
+p(x)&=\frac{1}{\sqrt{2\pi}\sigma_1}exp({-\frac{(x-\mu_1)^2}{2\sigma_1^2}}) \nonumber\\
+q(x)&=\frac{1}{\sqrt{2\pi}\sigma_2}exp({-\frac{(x-\mu_1)^2}{2\sigma_2^2}}) \nonumber
+\end{align}
+$$<p>将上述的KL散度转换为连续随机变量的形式：$D_{KL}(p||q)=\int[p(x)\log(p(x))-p(x)\log(q(x))]dx$, 将概率密度函数代入分别计算两项, 具体计算过程可以参考<a href=https://stats.stackexchange.com/questions/7440/kl-divergence-between-two-univariate-gaussians>KL divergence between two univariate Gaussians</a>, 其中关键在于$var(x)=E(x^2)-E(x)^2, E(x^2)=\sigma^2+\mu^2$：</p>$$
+\begin{align}
+\int p(x)\log(p(x))dx &= -\frac{1}{2}[1+\log(2\pi\sigma_1^2)] \nonumber\\
+\int p(x)\log(q(x))dx &= -\frac{1}{2}\log(2\pi\sigma_2^2)-\frac{\sigma_1^2+(\mu_1-\mu_2)^2}{2\sigma_2^2} \nonumber\\
+\end{align}
+$$<p>因此KL散度为：</p>$$
+\begin{align}
+D_{KL}(p||q)&=\log\frac{\sigma_2}{\sigma_1}+\frac{\sigma_1^2+(\mu_1-\mu_2)^2}{2\sigma_2^2}-\frac{1}{2} \nonumber\\
+\end{align}
+$$<h3 id=高斯分布的重参数化>高斯分布的重参数化<a hidden class=anchor aria-hidden=true href=#高斯分布的重参数化>#</a></h3><p>若希望从高斯分布中采样，我们可以使用标准正态分布$\mathcal{N}(0,1)$来采样$z$，然后通过重参数化$\sigma*z+\mu$的方式将其转换为高斯分布$N(\mu,\sigma^2)$。</p><p>这样做的好处在于将随机性转移到了$z$这个常量上，使得采样过程梯度可传播，从而可以使用梯度下降等优化算法进行训练。</p><h2 id=vae与多层vae>VAE与多层VAE<a hidden class=anchor aria-hidden=true href=#vae与多层vae>#</a></h2><h3 id=单层vae>单层VAE<a hidden class=anchor aria-hidden=true href=#单层vae>#</a></h3><p><img loading=lazy src=/img/VAE.png></p><p>VAE与传统自编码器不同之处在于，VAE将输入编码为隐空间上的分布，而并不是一个点，然后从该分布中采样一个点进行解码。VAE的目标是学习一个潜在变量$z$的分布$p(z)$，以及一个生成模型$p_{\theta}(x|z)$，使得$p_{\theta}(x|z)$能够生成与$x$相似的样本。</p>$$p(x)=\int_{z} p(x, z)$$$$p(x)=\int_{z} p_{\theta}(x|z)p(z)$$$$p(x)=\int_{z} q_{\phi}(z|x)\frac{p_{\theta}(x|z)p(z)}{q_{\phi}(z|x)}$$<p>依据最大似然理论，我们希望最大化对数似然函数：</p>$$\begin{align}
+\log p(x)&=\log \int_{z} q_{\phi}(z|x)\frac{p_{\theta}(x|z)p(z)}{q_{\phi}(z|x)} \nonumber\\
+&=\log \mathbb{E}_{z\sim q_{\phi}(z|x)}\frac{p_{\theta}(x|z)p(z)}{q_{\phi}(z|x)}\nonumber\\
+\end{align}
+$$<p>依据Jensen不等式，函数(凸函数)的期望大于等于期望的函数，我们可以得到最大似然函数的下界函数（ELBO）：</p>$$\begin{align}
+logp(x)&\ge \mathbb{E}_{z\sim q_{\phi}(z|x)}\left [\log \frac{p_{\theta}(x|z)p(z)}{q_{\phi}(z|x)} \right ] \nonumber\\
+&=\mathbb{E}_{z\sim q_{\phi}(z|x)}[\log p_{\theta}(x|z)]-\mathbb{E}_{z\sim q_{\phi}(z|x)}\left [\log \frac{q_{\phi}(z|x)}{p(z)}\right ] \nonumber\\
+&= \mathbb{E}_{z\sim q_{\phi}(z|x)}[\log p_{\theta}(x|z)]-D_{KL}(q_{\phi}(z|x)||p(z)) \nonumber\\
+\end{align}$$<p>第一项为重建项，第二项为正则化项。</p><h3 id=多层vae>多层VAE<a hidden class=anchor aria-hidden=true href=#多层vae>#</a></h3><p>&mldr;(updating)</p><h2 id=diffusion-models>Diffusion Models<a hidden class=anchor aria-hidden=true href=#diffusion-models>#</a></h2><p>&mldr;(updating)</p></div><footer class=post-footer><ul class=post-tags></ul></footer></article></main><footer class=footer><span>&copy; 2024 <a href=http://localhost:1313/blogs/>yi's blog</a></span> ·
+<span>Powered by
+<a href=https://gohugo.io/ rel="noopener noreferrer" target=_blank>Hugo</a> &
+        <a href=https://github.com/adityatelange/hugo-PaperMod/ rel=noopener target=_blank>PaperMod</a></span></footer><a href=#top aria-label="go to top" title="Go to Top (Alt + G)" class=top-link id=top-link accesskey=g><svg viewBox="0 0 12 6" fill="currentcolor"><path d="M12 6H0l6-6z"/></svg>
+</a><script>let menu=document.getElementById("menu");menu&&(menu.scrollLeft=localStorage.getItem("menu-scroll-position"),menu.onscroll=function(){localStorage.setItem("menu-scroll-position",menu.scrollLeft)}),document.querySelectorAll('a[href^="#"]').forEach(e=>{e.addEventListener("click",function(e){e.preventDefault();var t=this.getAttribute("href").substr(1);window.matchMedia("(prefers-reduced-motion: reduce)").matches?document.querySelector(`[id='${decodeURIComponent(t)}']`).scrollIntoView():document.querySelector(`[id='${decodeURIComponent(t)}']`).scrollIntoView({behavior:"smooth"}),t==="top"?history.replaceState(null,null," "):history.pushState(null,null,`#${t}`)})})</script><script>var mybutton=document.getElementById("top-link");window.onscroll=function(){document.body.scrollTop>800||document.documentElement.scrollTop>800?(mybutton.style.visibility="visible",mybutton.style.opacity="1"):(mybutton.style.visibility="hidden",mybutton.style.opacity="0")}</script><script>document.getElementById("theme-toggle").addEventListener("click",()=>{document.body.className.includes("dark")?(document.body.classList.remove("dark"),localStorage.setItem("pref-theme","light")):(document.body.classList.add("dark"),localStorage.setItem("pref-theme","dark"))})</script></body></html>
