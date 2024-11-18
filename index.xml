@@ -2,22 +2,22 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
     <title>yi&#39;s blog</title>
-    <link>http://localhost:1313/blogs/</link>
+    <link>https://liu-yii.github.io/blogs/</link>
     <description>Recent content on yi&#39;s blog</description>
     <image>
       <title>yi&#39;s blog</title>
-      <url>http://localhost:1313/blogs/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</url>
-      <link>http://localhost:1313/blogs/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
+      <url>https://liu-yii.github.io/blogs/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</url>
+      <link>https://liu-yii.github.io/blogs/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
     </image>
     <generator>Hugo -- 0.138.0</generator>
     <language>en</language>
     <lastBuildDate>Mon, 18 Nov 2024 15:06:13 +0800</lastBuildDate>
-    <atom:link href="http://localhost:1313/blogs/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://liu-yii.github.io/blogs/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>2024-11-18 X-Restormer</title>
-      <link>http://localhost:1313/blogs/posts/2024-11-18-x-restormer/</link>
+      <link>https://liu-yii.github.io/blogs/posts/2024-11-18-x-restormer/</link>
       <pubDate>Mon, 18 Nov 2024 15:06:13 +0800</pubDate>
-      <guid>http://localhost:1313/blogs/posts/2024-11-18-x-restormer/</guid>
+      <guid>https://liu-yii.github.io/blogs/posts/2024-11-18-x-restormer/</guid>
       <description>&lt;h2 id=&#34;daily-paper-001&#34;&gt;Daily Paper 001&lt;/h2&gt;
 &lt;p&gt;今天是每日一篇论文计划实施的第一天，主要是为了激励自己看论文(论文看得太少了😭).&lt;/p&gt;
 &lt;h2 id=&#34;title-a-comparative-study-of-image-restoration-networks-for-general-backbone-network-design-eccv-2024&#34;&gt;Title: A Comparative Study of Image Restoration Networks for General Backbone Network Design (ECCV 2024)&lt;/h2&gt;
@@ -28,7 +28,7 @@
 针对这一问题，文章设计了一种新的通用图像复原Backbone。&lt;/p&gt;
 &lt;h3 id=&#34;introduction&#34;&gt;Introduction&lt;/h3&gt;
 &lt;p&gt;首先造成图像复原框架任务表现差异性的主要原因在于，不同的图像修复任务所涉及的退化特征不同。文章选取了image SR, denoising, deblurring, deraining和dehazing五类任务(他们的退化特性各不相同)进行了五种backbone的通用性分析， 这五种backbone又可以分为三类经典的框架，U-Net框架(Uformer, Restormer), 残差框架(SwinIR, NAFNet), 多阶段渐进式框架(MPRNet). 并且还包含了卷积，空间自注意力(spatial self-attention)，转置自注意力(transposed self-attention).
-&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/blogs/blogs/posts/2024-11-18-x-restormer/img/fig1.png&#34;&gt;&lt;/p&gt;
+&lt;img loading=&#34;lazy&#34; src=&#34;https://liu-yii.github.io/blogs/blogs/posts/2024-11-18-x-restormer/img/fig1.png&#34;&gt;&lt;/p&gt;
 &lt;p&gt;图中可以看到Restormer在各项任务的表现都较好，因此作者对Restormer的结构优势进行了分析：&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;Restormer的U-Net架构可以处理大尺寸的输入，对于处理大区域的退化是必要的&lt;/li&gt;
@@ -50,9 +50,9 @@
     </item>
     <item>
       <title>Diffusion Models</title>
-      <link>http://localhost:1313/blogs/posts/2024-11-14-diffusion-models/</link>
+      <link>https://liu-yii.github.io/blogs/posts/2024-11-14-diffusion-models/</link>
       <pubDate>Thu, 14 Nov 2024 13:46:50 +0800</pubDate>
-      <guid>http://localhost:1313/blogs/posts/2024-11-14-diffusion-models/</guid>
+      <guid>https://liu-yii.github.io/blogs/posts/2024-11-14-diffusion-models/</guid>
       <description>&lt;h2 id=&#34;preliminary-knowledge&#34;&gt;Preliminary Knowledge&lt;/h2&gt;
 &lt;h3 id=&#34;条件概率公式&#34;&gt;条件概率公式&lt;/h3&gt;
 &lt;p&gt;条件概率的一般形式：&lt;/p&gt;
