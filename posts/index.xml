@@ -77,7 +77,7 @@
       <description>&lt;h2 id=&#34;preliminary-knowledge&#34;&gt;Preliminary Knowledge&lt;/h2&gt;
 &lt;h3 id=&#34;条件概率公式&#34;&gt;条件概率公式&lt;/h3&gt;
 &lt;p&gt;条件概率的一般形式：&lt;/p&gt;
-$$ P(A,B,C)=P(C|B,A)P(B,A)=P(C|B,A)P(B|A)P(A) $$$$ P(B,C|A)=P(C|B,A)P(B|A) $$&lt;p&gt;马尔可夫条件：下一状态的概率分布只能由当前状态决定，与前面的状态无关。&lt;/p&gt;
+$$ P(A,B,C)=P(C|B,A)P(B,A)=P(C|B,A)P(B|A)P(A) $$$$P(B,C|A)=P(C|B,A)P(B|A)$$&lt;p&gt;马尔可夫条件：下一状态的概率分布只能由当前状态决定，与前面的状态无关。&lt;/p&gt;
 &lt;p&gt;基于马尔可夫条件，在马尔可夫链A-&amp;gt;B-&amp;gt;C中：
 &lt;/p&gt;
 $$ P(A,B,C)=P(C|B)P(B|A)P(A) $$$$ P(B,C|A)=P(C|B)P(B|A) $$&lt;h3 id=&#34;kl散度&#34;&gt;KL散度&lt;/h3&gt;
