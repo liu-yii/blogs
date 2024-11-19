@@ -11,8 +11,29 @@
     </image>
     <generator>Hugo -- 0.138.0</generator>
     <language>en</language>
-    <lastBuildDate>Mon, 18 Nov 2024 15:06:13 +0800</lastBuildDate>
+    <lastBuildDate>Tue, 19 Nov 2024 17:27:33 +0800</lastBuildDate>
     <atom:link href="https://liu-yii.github.io/blogs/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>2024 11 19 LoRA IR</title>
+      <link>https://liu-yii.github.io/blogs/posts/2024-11-19-lora-ir/</link>
+      <pubDate>Tue, 19 Nov 2024 17:27:33 +0800</pubDate>
+      <guid>https://liu-yii.github.io/blogs/posts/2024-11-19-lora-ir/</guid>
+      <description>&lt;h2 id=&#34;daily-paper-002&#34;&gt;Daily Paper 002&lt;/h2&gt;
+&lt;p&gt;第二天！！🥳&lt;/p&gt;
+&lt;h2 id=&#34;title-lora-ir-taming-low-rank-experts-for-efficient-all-in-one-image-restoration-arxiv-2024&#34;&gt;Title: LoRA-IR: Taming Low-Rank Experts for Efficient All-in-One Image Restoration (ArXiv 2024)&lt;/h2&gt;
+&lt;h3 id=&#34;codehttpsgithubcomshallowdream204lora-ir&#34;&gt;&lt;a href=&#34;https://github.com/shallowdream204/LoRA-IR&#34;&gt;code&lt;/a&gt;&lt;/h3&gt;
+&lt;h3 id=&#34;heading&#34;&gt;⭐⭐⭐⭐&lt;/h3&gt;
+&lt;h3 id=&#34;abstract&#34;&gt;Abstract:&lt;/h3&gt;
+&lt;p&gt;Prompt based all-in-one IR方法在处理真实场景中的复杂多变的退化时仍然存在挑战。文章提出了LoRA-IR，分为两部分：&lt;strong&gt;degradation-guided pretraining&lt;/strong&gt;和&lt;strong&gt;parameter-efficient finetuning&lt;/strong&gt;。&lt;/p&gt;
+&lt;h3 id=&#34;introduction&#34;&gt;Introduction&lt;/h3&gt;
+&lt;p&gt;和之前的All-in-One方法类似，说明单一任务的模型很难在现实中不可预测和多变的环境中有效推广，并指出了之前的Prompt Learning IR的缺点：仅仅依靠&lt;strong&gt;轻量级的Prompt和static shared network&lt;/strong&gt;很难捕捉到不同退化类型的细节和specific patterns. 并且&lt;strong&gt;不同退化类型之间的潜在相关性和共有的特征&lt;/strong&gt;没有广泛利用.
+&lt;img loading=&#34;lazy&#34; src=&#34;https://liu-yii.github.io/blogs/blogs/posts/2024-11-19-lora-ir/img/fig1.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;针对上面的问题，提出了LoRA-IR. 与其他方法的不同之处在于，LoRA-IR基于CLIP生成degradation prompt. 但是CLIP侧重于影像的全局语义信息，在应用于low-level vision时会出现性能不佳的情况. 为了解决这一问题，文章提出了DG-Router，将影像分为两个分支输入CLIP，下采样获取全局的信息，用sliding-window获取局部信息。
+网络的训练分为两个阶段：1）用DG-Router得到的退化信息指导图像复原网络预训练；2）用LoRA对第一阶段得到的复原网络进行微调(基于MoE构建了一组low-rank restoration experts). 不同的专家模型增强了网络捕捉特定退化知识的能力，他们之间的协作则使网络具备了学习各种退化之间相关性的能力 (&lt;em&gt;Different experts enhance the network’s ability to capture degradationspecific knowledge, while their collaboration equips the network with the capability to learn correlations between various degradations&lt;/em&gt;)。
+&lt;img loading=&#34;lazy&#34; src=&#34;https://liu-yii.github.io/blogs/blogs/posts/2024-11-19-lora-ir/img/network.png&#34;&gt;&lt;/p&gt;
+&lt;h3 id=&#34;related-work&#34;&gt;Related Work&lt;/h3&gt;
+&lt;p&gt;文章从IR model，VLM以及Parameter-efficient Fine-tuning (PEFT)三个方面介绍了相关工作。我这里就重点看了一下PEFT工作(对应LoRA)。&lt;/p&gt;</description>
+    </item>
     <item>
       <title>2024-11-18 X-Restormer</title>
       <link>https://liu-yii.github.io/blogs/posts/2024-11-18-x-restormer/</link>
