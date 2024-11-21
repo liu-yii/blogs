@@ -9,10 +9,54 @@
       <url>https://liu-yii.github.io/blogs/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</url>
       <link>https://liu-yii.github.io/blogs/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
     </image>
-    <generator>Hugo -- 0.138.0</generator>
+    <generator>Hugo -- 0.139.0</generator>
     <language>en</language>
-    <lastBuildDate>Tue, 19 Nov 2024 17:27:33 +0800</lastBuildDate>
+    <lastBuildDate>Thu, 21 Nov 2024 17:16:07 +0800</lastBuildDate>
     <atom:link href="https://liu-yii.github.io/blogs/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>2024 11 21 AMIR</title>
+      <link>https://liu-yii.github.io/blogs/posts/2024-11-21-amir/</link>
+      <pubDate>Thu, 21 Nov 2024 17:16:07 +0800</pubDate>
+      <guid>https://liu-yii.github.io/blogs/posts/2024-11-21-amir/</guid>
+      <description>&lt;h2 id=&#34;daily-paper-004&#34;&gt;Daily Paper 004&lt;/h2&gt;
+&lt;p&gt;第四天！！这几天搞下新论文的思路验证了，daily paper可能写的比较简略🥶，但是还是坚持写下去吧，不然才四天就荒废了也太丢人了。&lt;/p&gt;
+&lt;h2 id=&#34;title-all-in-one-medical-image-restoration-via-task-adaptive-routing-miccai-2024&#34;&gt;Title: All-In-One Medical Image Restoration via Task-Adaptive Routing (MICCAI 2024)&lt;/h2&gt;
+&lt;h3 id=&#34;codehttpsgithubcomyaziwelamir&#34;&gt;&lt;a href=&#34;https://github.com/Yaziwel/AMIR&#34;&gt;code&lt;/a&gt;&lt;/h3&gt;
+&lt;h3 id=&#34;heading&#34;&gt;⭐⭐⭐⭐&lt;/h3&gt;
+&lt;h3 id=&#34;abstract&#34;&gt;Abstract&lt;/h3&gt;
+&lt;p&gt;文章主要设计了一个通用模型解决医学影像上的不同的修复任务，提出了一种任务自适应的routing策略，允许相互冲突的任务在空间和信道维度上选择不同的网络路径，减轻任务的干扰。&lt;/p&gt;
+&lt;h3 id=&#34;introduction&#34;&gt;Introduction&lt;/h3&gt;
+&lt;p&gt;医学影像修复任务主要包括MRI super-resolution, CT-denoising和PET synthesis。与自然影像的图像修复不同，医学影像的成像模态不同，不同任务的数据分布存在显著的差异。文章提出了一个通用的医学影像修复模型，关键理念是采用任务自适应routing策略，动态地将冲突任务的输入导向不同的网络路径，明确地减轻任务之间的干扰。包括instruction learning, spatial routing和channel routing。instruction learning旨在根据输入图像自适应地学习与任务相关的指令，而spatial routing和channel routing则利用这些学习到的prompt分别在空间和信道层面指导网络特征的路由，从而减轻潜在的干扰。
+&lt;img loading=&#34;lazy&#34; src=&#34;https://liu-yii.github.io/blogs/blogs/posts/2024-11-21-amir/img/network.png&#34;&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>2024 11 20 PromptSR</title>
+      <link>https://liu-yii.github.io/blogs/posts/2024-11-20-promptsr/</link>
+      <pubDate>Wed, 20 Nov 2024 15:38:25 +0800</pubDate>
+      <guid>https://liu-yii.github.io/blogs/posts/2024-11-20-promptsr/</guid>
+      <description>&lt;h2 id=&#34;daily-paper-003&#34;&gt;Daily Paper 003&lt;/h2&gt;
+&lt;p&gt;第三天！！🥳 这篇文章需要重点看看。&lt;/p&gt;
+&lt;h2 id=&#34;title-image-super-resolution-with-text-prompt-diffusion-arxiv-2024&#34;&gt;Title: Image Super-resolution with Text Prompt Diffusion (ArXiv 2024)&lt;/h2&gt;
+&lt;h3 id=&#34;codehttpsgithubcomzhengchen1999promptsr&#34;&gt;&lt;a href=&#34;https://github.com/zhengchen1999/PromptSR&#34;&gt;code&lt;/a&gt;&lt;/h3&gt;
+&lt;h3 id=&#34;heading&#34;&gt;⭐⭐⭐⭐&lt;/h3&gt;
+&lt;h3 id=&#34;introduction&#34;&gt;Introduction&lt;/h3&gt;
+&lt;p&gt;在真实应用中，场景往往存在复杂多样的退化类型，现有的方法大部分都是在已知退化类型(双三次下采样)的数据上进行训练的，因此在推理的时候效果往往不好。常用的解决方法是盲超分方法，大致可以分为三类：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Explicit Methods 通常依赖于预定义的退化模型。它们将降解参数（如模糊核或噪声）作为 SR 模型的条件输入进行估计。预定义的退化模型限制了退化表示的范围，从而限制了方法的通用性。&lt;/li&gt;
+&lt;li&gt;Implicit Methods 通过广泛的外部数据集来捕捉潜在的降解模型。它们通过利用真实捕获的 HR-LR 图像对或 HR 和未配对的 LR 数据来学习数据分布，从而实现这一目标。但是学习数据分布具有一定的挑战性，效果并不理想。&lt;/li&gt;
+&lt;li&gt;定义复杂退化，合成大量数据用于训练。为了模拟真实世界的退化，这些方法将退化分布设置得足够广泛。然而，这增加了 SR 模型的学习难度，并不可避免地导致性能下降。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;总体来说，对于SR来说，退化模型的建模尤为重要。但是现有的方法都局限于从LR输入上获取退化信息，表征能力有限。一种方法是引入额外信息，比如参考先验[&lt;em&gt;Robust referencebased super-resolution via c2-matching&lt;/em&gt;]和生成先验[&lt;em&gt;Glean: Generative latent bank for large-factor image super-resolution, Gan prior embedded network for blind face restoration in the wild&lt;/em&gt;]。文章提出了引入text prompt作为先验，其好处在于：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;文本信息本身具有灵活性，适用于各种情况&lt;/li&gt;
+&lt;li&gt;可以利用当前的预训练视觉语言模型的强大功能&lt;/li&gt;
+&lt;li&gt;文本引导可作为SR的补充信息&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;文章提出了一个用于SR退化模型的文本-图像的生成模型。用&lt;strong&gt;Text Prompt&lt;/strong&gt;来表示退化以提供额外的先验信息(这里作者说LR图像可以提供与内容相关的低频信息和语义信息，因此不需要整体图像的描述。&lt;em&gt;我觉得可能确实LR图像表达了部分低频信息和语义信息，但是加入全局的caption会不会更好一点。&lt;/em&gt;)。然后用binning method[&lt;em&gt;Crafting training degradation distribution for the accuracy-generalization trade-off in real-world superresolution&lt;/em&gt;]对退化分布进行分区，然后对每个分区进行文字描述后合并，得到最终的text prompt。
+&lt;img loading=&#34;lazy&#34; src=&#34;https://liu-yii.github.io/blogs/blogs/posts/2024-11-20-promptsr/img/text-image.png&#34;&gt;
+然后进一步提出了PromptSR方法，利用预训练的语言模型充当文本编码器，将Text Prompt映射到嵌入序列中。然后，扩散模型以LR图像和文本嵌入为条件，生成相应的HR图像。
+&lt;img loading=&#34;lazy&#34; src=&#34;https://liu-yii.github.io/blogs/blogs/posts/2024-11-20-promptsr/img/network.png&#34;&gt;&lt;/p&gt;</description>
+    </item>
     <item>
       <title>2024 11 19 LoRA IR</title>
       <link>https://liu-yii.github.io/blogs/posts/2024-11-19-lora-ir/</link>
@@ -66,8 +110,8 @@
 &lt;ul&gt;
 &lt;li&gt;
 &lt;p&gt;image Super-Resolution&lt;/p&gt;
-&lt;p&gt;$ I_{GT} \in \mathbb{R}^{H\times W\times 3}$表示ground truth image，$ I_{LQ} \in \mathbb{R}^{h\times w\times 3}$表示退化图像. 图像超分辨率任务的退化模型就可以表示为：
-&lt;/p&gt;</description>
+$$I_{LQ}=(I_{GT}\otimes k)\downarrow_{s} $$&lt;p&gt;
+这种退化模型与局部信息是高度相关的，并且高频信息大量丢失。因此SR网络强调强大的空间信息交互能力，以重建尽可能多的细节。&lt;/p&gt;</description>
     </item>
     <item>
       <title>Diffusion Models</title>
@@ -78,16 +122,10 @@
 &lt;h3 id=&#34;条件概率公式&#34;&gt;条件概率公式&lt;/h3&gt;
 &lt;p&gt;条件概率的一般形式：&lt;/p&gt;
 $$ P(A,B,C)=P(C|B,A)P(B,A)=P(C|B,A)P(B|A)P(A) $$$$P(B,C|A)=P(C|B,A)P(B|A)$$&lt;p&gt;马尔可夫条件：下一状态的概率分布只能由当前状态决定，与前面的状态无关。&lt;/p&gt;
-&lt;p&gt;基于马尔可夫条件，在马尔可夫链A-&amp;gt;B-&amp;gt;C中：
-&lt;/p&gt;
 $$ P(A,B,C)=P(C|B)P(B|A)P(A) $$$$ P(B,C|A)=P(C|B)P(B|A) $$&lt;h3 id=&#34;kl散度&#34;&gt;KL散度&lt;/h3&gt;
 &lt;p&gt;KL散度是衡量两个概率分布之间差异的一种度量方法，它衡量了从一个分布到另一个分布所需的额外信息。KL散度的定义是建立在熵Entropy的基础上的，熵Entropy的定义如下：&lt;/p&gt;
-&lt;p&gt;若一个离散随机变量$X$的可能取值为$\left [x_1,x_2,x_3,&amp;hellip;\right ]$，它们的概率分布为$p_i=p(X=x_i)$，则$X$的熵为：
-&lt;/p&gt;
 $$H(X)=-\sum_{i=1}^{n}p_i\log p_i$$&lt;p&gt;
 规定当$p_i=0$时，$p_i\log p_i=0$&lt;/p&gt;
-&lt;p&gt;若有两个随机变量$X$和$Y$，它们的概率分布分别为$p(x)$和$q(x)$，则$p$和$q$的交叉熵为：
-&lt;/p&gt;
 $$H(p,q)=-\sum_{i=1}^{n}p(x)\log q(x)$$&lt;p&gt;
 在信息论中，交叉熵可认为是对预测分布$q(x)$用真实分布$p(x)$来进行编码时所需要的信息量大小&lt;/p&gt;
 &lt;p&gt;因此我们可以通过交叉熵和信息熵来推到相对熵即KL散度：&lt;/p&gt;
@@ -103,23 +141,26 @@ KL散度的特点：&lt;/p&gt;
 &lt;li&gt;非对称性：$D_{KL}(p||q)\neq D_{KL}(q||p)$&lt;/li&gt;
 &lt;li&gt;非负性：$D_{KL}(p||q)\geq 0$&lt;/li&gt;
 &lt;/ol&gt;
-&lt;p&gt;对于两个单一变量的高斯分布$p=\mathcal{N}(\mu_1,\sigma_1^2)$和$q=\mathcal{N}(\mu_2,\sigma_2^2)$而言，正态分布的概率密度函数为：
-&lt;/p&gt;
 $$
 \begin{align}
 p(x)&amp;=\frac{1}{\sqrt{2\pi}\sigma_1}exp({-\frac{(x-\mu_1)^2}{2\sigma_1^2}}) \nonumber\\
 q(x)&amp;=\frac{1}{\sqrt{2\pi}\sigma_2}exp({-\frac{(x-\mu_1)^2}{2\sigma_2^2}}) \nonumber
 \end{align}
-$$&lt;p&gt;
-将上述的KL散度转换为连续随机变量的形式：$D_{KL}(p||q)=\int[p(x)\log(p(x))-p(x)\log(q(x))]dx$, 将概率密度函数代入分别计算两项, 具体计算过程可以参考&lt;a href=&#34;https://stats.stackexchange.com/questions/7440/kl-divergence-between-two-univariate-gaussians&#34;&gt;KL divergence between two univariate Gaussians&lt;/a&gt;, 其中关键在于$var(x)=E(x^2)-E(x)^2, E(x^2)=\sigma^2+\mu^2$：
-&lt;/p&gt;
-$$
+$$$$
 \begin{align}
 \int p(x)\log(p(x))dx &amp;= -\frac{1}{2}[1+\log(2\pi\sigma_1^2)] \nonumber\\
 \int p(x)\log(q(x))dx &amp;= -\frac{1}{2}\log(2\pi\sigma_2^2)-\frac{\sigma_1^2+(\mu_1-\mu_2)^2}{2\sigma_2^2} \nonumber\\
 \end{align}
-$$&lt;p&gt;因此KL散度为：
-&lt;/p&gt;</description>
+$$$$
+\begin{align}
+D_{KL}(p||q)&amp;=\log\frac{\sigma_2}{\sigma_1}+\frac{\sigma_1^2+(\mu_1-\mu_2)^2}{2\sigma_2^2}-\frac{1}{2} \nonumber\\
+\end{align}
+$$&lt;h3 id=&#34;高斯分布的重参数化&#34;&gt;高斯分布的重参数化&lt;/h3&gt;
+&lt;p&gt;若希望从高斯分布中采样，我们可以使用标准正态分布$\mathcal{N}(0,1)$来采样$z$，然后通过重参数化$\sigma*z+\mu$的方式将其转换为高斯分布$N(\mu,\sigma^2)$。&lt;/p&gt;
+&lt;p&gt;这样做的好处在于将随机性转移到了$z$这个常量上，使得采样过程梯度可传播，从而可以使用梯度下降等优化算法进行训练。&lt;/p&gt;
+&lt;h2 id=&#34;vae与多层vae&#34;&gt;VAE与多层VAE&lt;/h2&gt;
+&lt;h3 id=&#34;单层vae&#34;&gt;单层VAE&lt;/h3&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;https://liu-yii.github.io/blogs/blogs/posts/2024-11-14-diffusion-models/img/VAE.png&#34;&gt;&lt;/p&gt;</description>
     </item>
   </channel>
 </rss>
