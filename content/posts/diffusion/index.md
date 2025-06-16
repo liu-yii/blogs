@@ -128,3 +128,9 @@ $$
 ## Diffusion Models
 
 （待更新）
+
+
+## Diffusion Priors
+Diffusion models as plug-and-play priors
+之前不是很懂diffusion prior的意思，直到最近看到了这篇文章，Diffusion models as plug-and-play priors (NIPS2022)
+文章的思路比较有意思，提出了预训练的扩散生成模型(e.g. Stable Diffusion)是可以作为一个plug-and-play的模块直接使用的。这样我们在使用的时候也不需要对模型进行训练或者微调，这就大大减少了训练成本。这种方法跟我们的先验知识一样，所以也叫扩散先验diffusion prior。
