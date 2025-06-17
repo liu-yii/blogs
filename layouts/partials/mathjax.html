@@ -25,11 +25,41 @@ MathJax.Hub.Queue(function() {
 </script>
 
 <style>
-code.has-jax {
-    font: inherit;
-    font-size: 100%;
-    background: inherit;
-    border: inherit;
-    color: #515151;
-}
+    /* 行内公式 */
+    code.has-jax {
+      font: inherit;
+      font-size: 100%;
+      background: inherit;
+      border: inherit;
+      color: inherit;
+    }
+    /* 块级公式样式 */
+    .MathJax_Display {
+      display: block;
+      overflow-x: auto;
+      overflow-y: hidden;
+      text-align: center;
+      white-space: normal;
+      font-size: 0.9em;
+    }
+
+    /* 缩放公式字体以适应小屏 */
+    @media (max-width: 768px) {
+      .MathJax_Display {
+        font-size: 0.95em;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .MathJax_Display {
+        font-size: 0.85em;
+      }
+    }
+
+    /* 响应式适配移动端 */
+    @media (max-width: 600px) {
+      .MathJax_Display {
+        font-size: 0.9em;
+      }
+    }
 </style>
