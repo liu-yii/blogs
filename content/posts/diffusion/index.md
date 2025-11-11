@@ -103,7 +103,8 @@ $$
 
 $$
 \begin{align}
-\log p(x) &= \log \int_{z} q_{\phi}(z|x)\frac{p_{\theta}(x|z)p(z)}{q_{\phi}(z|x)} \\\\
+\log p(x) &= \log \int_{z} q_{\phi}(z|x)\frac{p_{\theta}(x|z)p(z)}{q_{\phi}(z|x)} \\
+\nonumber
 &= \log \mathbb{E}_{z\sim q_{\phi}(z|x)}\left[\frac{p_{\theta}(x|z)p(z)}{q_{\phi}(z|x)}\right]
 \end{align}
 $$
@@ -111,6 +112,7 @@ $$
 $$
 \begin{align}
 \log p(x) &\ge \mathbb{E}_{z\sim q_{\phi}(z|x)}\left[\log \frac{p_{\theta}(x|z)p(z)}{q_{\phi}(z|x)}\right] \\
+\nonumber
 &= \mathbb{E}_{z\sim q_{\phi}(z|x)}[\log p_{\theta}(x|z)] - D_{KL}(q_{\phi}(z|x) || p(z))
 \end{align}
 $$
@@ -126,11 +128,65 @@ $$
 ---
 
 ## Diffusion Models
+主要参考了[Lil's Log](https://lilianweng.github.io/posts/2021-07-11-diffusion-models/#quick-summary)
+### 前向扩散过程（加噪）
+Given a data point sampled form a real data distribution $x_0 \sim q(x)$, we  define a **forward diffusion process**: we add small amount of Gaussian noise to the sample in $T$ steps, producing a sequence of noisy samples $x_1,...,x_T$. The step sizes are controlled by a variance schedule $\{\beta_{t}\in(0,1)\}_{t=1}^{T}$.
 
-（待更新）
+$$
+q(x_t|x_{t-1}) = \mathcal{N}(x_t; \sqrt{1-\beta_t}x_{t-1}, \beta_t I)\\
+q(x_{1:T}|x_0) = \prod_{t=1}^{T}q(x_t|x_{t-1})
+$$
+
+*这里的前向过程可以视为马尔可夫过程，即当前状态$x_t$只与上一时刻的状态$x_{t-1}$有关。在给定上一状态$x_{t-1}$的条件下，获取第$t$步样本$x_t$的概率分布q(x_t|x_{t-1})。$\mathcal{N}(x_t; \sqrt{1-\beta_t}x_{t-1}, \beta_t I)$ 表示给定上一步的状态$x_{t-1}$， $x_{t}$是一个以$\sqrt{1-\beta_t}x_{t-1}$为均值, $\beta_t I$为协方差的高斯分布的随机变量.*
+
+*也就是说：$x_{t} = \sqrt{\alpha_t}x_{t-1}+\sqrt{1-\alpha_{t}}\epsilon_{t-1}, \epsilon_{t-1}\in\mathcal{N}(0,I)$*
+
+*因此，当步数$t$逐渐增大时，采样数据$x_0$会逐渐趋向于纯高斯噪声*
+![VAE 结构图](img/diffusion_process.png)
+
+At any arbitrary time step $t$, we can sample $x_t$ in above process. Let $\alpha_{t} = 1-\beta_{t}$ and $\bar{\alpha}_{t} = \prod_{i=1}^{t}\alpha_{i}$:
+
+$$
+\begin{align}
+
+x_{t} &= \sqrt{\alpha_t}x_{t-1}+\sqrt{1-\alpha_{t}}\epsilon_{t} \\
+\nonumber
+&=\sqrt{\alpha_t\alpha_{t-1}}x_{t-2}+\sqrt{1-\alpha_{t}\alpha_{t-1}}\epsilon_{t-2} \\
+\nonumber
+&=...\\
+\nonumber
+&=\sqrt{\bar{\alpha}_{t}}x_{0}+\sqrt{1-\bar{\alpha}_{t}}\epsilon \\
+q(x_t|x_0) &= \mathcal{N}(x_t; \sqrt{\bar{\alpha}_{t}}x_{0}, (1-\bar{\alpha}_{t})I)
+\end{align}
+$$
 
 
-## Diffusion Priors
-Diffusion models as plug-and-play priors
-之前不是很懂diffusion prior的意思，直到最近看到了这篇文章，Diffusion models as plug-and-play priors (NIPS2022)
-文章的思路比较有意思，提出了预训练的扩散生成模型(e.g. Stable Diffusion)是可以作为一个plug-and-play的模块直接使用的。这样我们在使用的时候也不需要对模型进行训练或者微调，这就大大减少了训练成本。这种方法跟我们的先验知识一样，所以也叫扩散先验diffusion prior。
+### 反向扩散过程（去噪）
+If we can reverse the forward process and sample from $q(x_{t-1}|x_t)$, we will be able to recreate the true sample form a Gaussian noise input, $x_{T} \sim \mathcal{N}(0,I)$. Unfortunately, we cannot easily estimate $q(x_{t-1}|x_t)$ because it needs to use the entire dataset and therefore we need to learn a model $p_{\theta}$ to approximate these conditional probabilities in order to run the *reverse diffusion process*.
+$$
+\begin{align}
+p_{\theta}(x_{0:T}) &= p(x_T)\prod_{i=1}^{t}p_{\theta}(x_{t-1}|x_t)\\
+p_{\theta}(x_{t-1}|x_t) &= \mathcal{N}(x_{t-1};\mu_{\theta}(x_t,t), \Sigma_{\theta}(x_t,t))
+\end{align}
+$$
+
+*如何学习这一过程呢？最简单的方法就是最小化$x_{t-1}$和$p_{\theta}(x_{t-1}|x_t)$之间的欧式距离*：
+$$
+||x_{t-1}-p_{\theta}(x_{t-1}|x_t)||^{2}
+$$
+*继续细化这一过程，将前向过程可以改写为$x_{t-1}=\frac{1}{\sqrt{\alpha_t}}(x_t-\sqrt{1-\alpha_{t}}\epsilon_{t})$，因此模型$p_{\theta}$可以设计为*：
+$$
+p_{\theta}(x_{t-1}|x_t) = \frac{1}{\sqrt{\alpha_t}}(x_t-\sqrt{1-\alpha_{t}}\epsilon_{\theta}(x_t,t))
+$$
+*代入训练损失函数*：
+$$
+||x_{t-1}-p_{\theta}(x_{t-1}|x_t)||^{2} = \frac{\beta_{t}}{\alpha_t}||\epsilon_{t}-\epsilon_{\theta}(x_t,t)||^{2}
+$$
+*忽略常数系数$\frac{\beta_{t}}{\alpha_t}$，然后代入$x_{t} = \sqrt{\bar{\alpha}_{t}}x_{0}+\sqrt{1-\bar{\alpha}_{t}}\epsilon$，最终得到的损失函数*：
+$$
+||\epsilon_{t}-\epsilon_{\theta}(\sqrt{\bar{\alpha}_{t}}x_{0}+\sqrt{1-\bar{\alpha}_{t}}\epsilon_{t},t)||^{2}
+$$
+
+
+## Conditioned Generation
+### Classifier Guided Diffusion 
