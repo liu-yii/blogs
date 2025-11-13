@@ -171,7 +171,7 @@ $$
 主要参考了[Lil's Log](https://lilianweng.github.io/posts/2021-07-11-diffusion-models/#quick-summary)，苏神的[生成扩散模型漫谈系列](https://spaces.ac.cn/)
 ### DDPM
 ### 前向扩散过程（加噪）
-Given a data point sampled form a real data distribution $x_0 \sim q(x)$, we  define a **forward diffusion process**: we add small amount of Gaussian noise to the sample in $T$ steps, producing a sequence of noisy samples $x_1,...,x_T$. The step sizes are controlled by a variance schedule $\{\beta_{t}\in(0,1)\}_{t=1}^{T}$.
+*Given a data point sampled form a real data distribution $x_0 \sim q(x)$, we  define a **forward diffusion process**: we add small amount of Gaussian noise to the sample in $T$ steps, producing a sequence of noisy samples $x_1,...,x_T$. The step sizes are controlled by a variance schedule $\{\beta_{t}\in(0,1)\}_{t=1}^{T}$.*
 
 $$
 \begin{align}
@@ -180,14 +180,14 @@ q(x_{1:T}|x_0) &= \prod_{t=1}^{T}q(x_t|x_{t-1})
 \end{align}
 $$
 
-*这里的前向过程可以视为马尔可夫过程，即当前状态$x_t$只与上一时刻的状态$x_{t-1}$有关。在给定上一状态$x_{t-1}$的条件下，获取第$t$步样本$x_t$的概率分布q(x_t|x_{t-1})。$\mathcal{N}(x_t; \sqrt{1-\beta_t}x_{t-1}, \beta_t I)$ 表示给定上一步的状态$x_{t-1}$， $x_{t}$是一个以$\sqrt{1-\beta_t}x_{t-1}$为均值, $\beta_t I$为协方差的高斯分布的随机变量.*
+这里的前向过程可以视为马尔可夫过程，即当前状态$x_t$只与上一时刻的状态$x_{t-1}$有关。在给定上一状态$x_{t-1}$的条件下，获取第$t$步样本$x_t$的概率分布q(x_t|x_{t-1})。$\mathcal{N}(x_t; \sqrt{1-\beta_t}x_{t-1}, \beta_t I)$ 表示给定上一步的状态$x_{t-1}$， $x_{t}$是一个以$\sqrt{1-\beta_t}x_{t-1}$为均值, $\beta_t I$为协方差的高斯分布的随机变量.
 
-*也就是说：$x_{t} = \sqrt{\alpha_t}x_{t-1}+\sqrt{1-\alpha_{t}}\epsilon_{t-1}, \epsilon_{t-1}\in\mathcal{N}(0,I)$*
+也就是说：$x_{t} = \sqrt{\alpha_t}x_{t-1}+\sqrt{1-\alpha_{t}}\epsilon_{t-1}, \epsilon_{t-1}\in\mathcal{N}(0,I)$
 
-*因此，当步数$t$逐渐增大时，采样数据$x_0$会逐渐趋向于纯高斯噪声*
+因此，当步数$t$逐渐增大时，采样数据$x_0$会逐渐趋向于纯高斯噪声
 ![VAE 结构图](img/diffusion_process.png)
 
-At any arbitrary time step $t$, we can sample $x_t$ in above process. Let $\alpha_{t} = 1-\beta_{t}$ and $\bar{\alpha}_{t} = \prod_{i=1}^{t}\alpha_{i}$:
+*At any arbitrary time step $t$, we can sample $x_t$ in above process. Let $\alpha_{t} = 1-\beta_{t}$, $\bar{\alpha}\_{t} = \prod\_{i=1}^{t}\alpha\_{i}$ and $\bar{\beta}\_{t} = \sqrt{1-\bar{\alpha}\_{t}^2}$*:
 
 $$
 \begin{align}
@@ -204,7 +204,7 @@ $$
 
 
 ### 反向扩散过程（去噪）
-If we can reverse the forward process and sample from $q(x_{t-1}|x_t)$, we will be able to recreate the true sample form a Gaussian noise input, $x_{T} \sim \mathcal{N}(0,I)$. Unfortunately, we cannot easily estimate $q(x_{t-1}|x_t)$ because it needs to use the entire dataset and therefore we need to learn a model $p_{\theta}$ to approximate these conditional probabilities in order to run the *reverse diffusion process*.
+*If we can reverse the forward process and sample from $q(x_{t-1}|x_t)$, we will be able to recreate the true sample form a Gaussian noise input, $x_{T} \sim \mathcal{N}(0,I)$. Unfortunately, we cannot easily estimate $q(x_{t-1}|x_t)$ because it needs to use the entire dataset and therefore we need to learn a model $p_{\theta}$ to approximate these conditional probabilities in order to run the reverse diffusion process*.
 
 $$
 \begin{align}
@@ -213,31 +213,112 @@ p_{\theta}(x_{t-1}|x_t) &= \mathcal{N}(x_{t-1};\mu_{\theta}(x_t,t), \Sigma_{\the
 \end{align}
 $$
 
-*如何学习这一过程呢？最简单的方法就是最小化$x_{t-1}$和$p_{\theta}(x_{t-1}|x_t)$之间的欧式距离*：
+如何学习这一过程呢？最简单的方法就是最小化$x_{t-1}$和$p_{\theta}(x_{t-1}|x_t)$之间的欧式距离：
 
 $$
 ||x_{t-1}-p_{\theta}(x_{t-1}|x_t)||^{2}
 $$
 
-*继续细化这一过程，将前向过程可以改写为$x_{t-1}=\frac{1}{\sqrt{\alpha_t}}(x_t-\sqrt{1-\alpha_{t}}\epsilon_{t})$，因此模型$p_{\theta}$可以设计为*：
+继续细化这一过程，将前向过程可以改写为$x_{t-1}=\frac{1}{\sqrt{\alpha_t}}(x_t-\sqrt{1-\alpha_{t}}\epsilon_{t})$，因此模型$p_{\theta}$可以设计为：
 
 $$
 p_{\theta}(x_{t-1}|x_t) = \frac{1}{\sqrt{\alpha_t}}(x_t-\sqrt{1-\alpha_{t}}\epsilon_{\theta}(x_t,t))
 $$
 
-*代入训练损失函数*：
+代入训练损失函数：
 
 $$
 ||x_{t-1}-p_{\theta}(x_{t-1}|x_t)||^{2} = \frac{\beta_{t}}{\alpha_t}||\epsilon_{t}-\epsilon_{\theta}(x_t,t)||^{2}
 $$
 
-*忽略常数系数 $\frac{\beta\_{t}}{\alpha\_t}$，然后代入 $x_{t} = \sqrt{\bar{\alpha}\_{t}}x\_{0}+\sqrt{1-\bar{\alpha}\_{t}}\epsilon$，最终得到的损失函数*：
+忽略常数系数 $\frac{\beta\_{t}}{\alpha\_t}$，然后代入 $x_{t} = \sqrt{\bar{\alpha}\_{t}}x\_{0}+\sqrt{1-\bar{\alpha}\_{t}}\epsilon$，最终得到的损失函数：
 
 $$
 ||\epsilon\_{t}-\epsilon\_{\theta}(\sqrt{\bar{\alpha}\_{t}}x\_{0}+\sqrt{1-\bar{\alpha}\_{t}}\epsilon\_{t},t)||^{2}
 $$
 
+
 ### DDIM
+我们也可以用贝叶斯重新认识DDPM的过程：
+
+正向过程每一步是 $x_{t} = \sqrt{\alpha_t}x_{t-1}+\sqrt{1-\alpha_{t}}\epsilon_{t-1}, \epsilon_{t-1}\in\mathcal{N}(0,I)$，可以求出 $q(x\_t|x\_0) = \mathcal{N}(x\_t; \sqrt{\bar{\alpha}\_{t}}x\_{0}, (1-\bar{\alpha}\_{t})I)$。DDPM要做的事就是从正向过程中求出反向过程所需要的 $q(x_{t-1}|x_t)$，这样就可以实现从任意 $x_T=z$ 出发，逐步采样出$x_{T-1}, x_{T-2}, ...$ 一直到 $x_0$。
+
+那么，根据贝叶斯定理，我们有：
+
+$$
+q(x_{t-1}|x_{t}) = \frac{q(x_{t}|x_{t-1})q(x_{t-1})}{q(x_t)}
+$$
+
+我们不知道 $q(x_{t-1})$ 和 $q(x_t)$ 的表达式，但是我们知道的 $x_0$，因此我们可以将 $x_0$ 加入得到：
+
+$$
+q(x_{t-1}|x_{t}, x_0) = \frac{q(x_{t}|x_{t-1})q(x_{t-1}|x_0)}{q(x_t|x_0)}
+$$
+
+这样公式的每一项我们都是已知的，所以上式是可以计算出来的：
+
+$$
+\begin{align}
+q({x}\_{t-1}|{x}\_t,{x}\_0)=\mathcal{N}\left({x}\_{t-1};\frac{\alpha\_t\bar{\beta}\_{t-1}^2}{\bar{\beta}\_t^2}{x}\_t+\frac{\bar{\alpha}\_{t-1}\beta\_t^2}{\bar{\beta}\_t^2}{x}\_0,\frac{\bar{\beta}\_{t-1}^2\beta\_t^2}{\bar{\beta}\_t^2}{I}\right)
+\label{eq_backward}
+\end{align}
+$$
+
+目前 $q({x}\_{t-1}|{x}\_t,{x}\_0)$ 有两个依赖项$x_t, x_0$，但实际上 $x_0$ 是我们最终想要生成的结果，我们不能依赖 $x_0$。那么一个自然的想法是如果我们能够通过 $x_t$ 来预测 $x_0$，不就可以避免这一问题了吗？因此可以引入去噪模型 $\bar{\mu}(x_t)$ 来预测 $x_0$：
+
+$$
+\bar{\mu}(x_t) = \frac{1}{\bar{\alpha}\_t}(x_t-\bar{\beta}\_t\epsilon_{\theta}(x_t,t))
+$$
+
+代入 $\eqref{eq_backward}$，可以得到：
+$$
+q({x}\_{t-1}|{x}\_t,{x}\_0) \approx \mathcal{N}\left({x}\_{t-1};\frac{1}{\alpha\_t}\left(x_t-\frac{\beta\_t^2}{\bar{\beta}\_t}\epsilon\_{\theta}(x_t, t)\right),\frac{\bar{\beta}\_{t-1}^2 \beta\_t^2}{\bar{\beta}\_t^2}I\right)
+$$
+
+虽然我们从单步正向过程 $q(x_t|x_{t-1})$ 一步步推导到 $q({x}\_{t-1}|{x}\_t,{x}\_0)$，但是我们可以看到实际上结果与 $q(x_t|x_{t-1})$ 并没有什么关系，那么DDIM的思想就是在推导过程中舍弃掉 $q(x_t|x_{t-1})$。那么该如何求解 $q({x}\_{t-1}|{x}\_t,{x}\_0)$ 呢？
+
+DDIM提出用待定系数法求解，我们仍然假设 $q({x}\_{t-1}|{x}\_t,{x}\_0)$ 为正态分布：
+
+$$
+\begin{align}
+q({x}\_{t-1}|{x}\_t,{x}\_0) = \mathcal{N}\left(x_{t-1}; \kappa\_{t}x_t+\lambda\_{t}x_0, \sigma\_{t}^2 I\right)
+\label{eq_ddim}
+\end{align}
+$$
+
+并且该分布需要满足边际分布条件：
+$$
+\int q({x}\_{t-1}|{x}\_t,{x}\_0)q(x_t|x_0) = q(x_{t-1}|x_0)
+$$
+
+想要满足该条件，其实只需要满足两个方程：
+$$
+\begin{align}
+\bar{\alpha}\_{t-1} &= \kappa\_{t}\bar{\alpha}\_{t}+\lambda\_{t} \\\\
+\bar{\beta}\_{t-1} &= \sqrt{\kappa\_{t}^2\bar{\beta}\_{t}^2+\lambda\_{t}^2}
+\end{align}
+$$
+
+*关于如何得到这两个方程，可以参考苏神[生成扩散模型漫谈（四）](https://spaces.ac.cn/archives/9181)*
+![DDIM](img/ddim.png)
+
+解这两个方程，可以得到 $\kappa\_{t}$ 和 $\lambda\_{t}$ 的表达式：
+
+$$
+\begin{align}
+\kappa\_{t} &= \frac{\sqrt{\bar{\beta}\_{t-1}^2-\sigma\_t^2}}{\bar{\beta}\_t} \\\\
+\lambda\_{t} &= \bar\alpha_{t-1}-\frac{\bar\alpha\_t\sqrt{\bar{\beta}\_{t-1}^2-\sigma\_t^2}}{\bar{\beta}\_t}
+\end{align}
+$$
+
+可以代入 $\eqref{eq_ddim}$，同时将$x_0$替换为用$x_t$推导的形式(和DDPM一样)，最终得到：
+$$
+\begin{align}
+q(x_{t-1}|x_t) \approx \mathcal{N}\left({x}\_{t-1};\frac{1}{\alpha\_t}\left(x_t-\left(\bar\beta_t-\alpha_t\sqrt{\bar\beta_{t-1}^2-\sigma_t^2}\right)\epsilon\_{\theta}(x_t, t)\right),\sigma_t^2 I\right)
+\end{align}
+$$
+
+
 
 ## Conditioned Generation
 ### Classifier Guided Diffusion 
