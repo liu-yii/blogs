@@ -45,6 +45,8 @@ languages:
         - name: About
           pageRef: about/
           weight: 21
+
+
 params:
   env: production # to enable google analytics, opengraph, twitter-cards and schema.
   title: ExampleSite
@@ -58,6 +60,7 @@ params:
   defaultTheme: auto # dark, light
   # 是否禁用主题切换按钮
   disableThemeToggle: false
+  math: true
 
   # 是否启用阅读时间展示
   ShowReadingTime: true

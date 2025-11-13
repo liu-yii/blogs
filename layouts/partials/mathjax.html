@@ -1,15 +1,16 @@
-<script type="text/javascript"
+<!-- <script type="text/javascript"
         async
         src="https://cdn.bootcss.com/mathjax/2.7.3/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
 MathJax.Hub.Config({
   tex2jax: {
     inlineMath: [['$','$'], ['\\(','\\)']],
-    displayMath: [['$$','$$'], ['\[\[','\]\]']],
+    displayMath: [['$$','$$'], ['\\[','\\]']],
     processEscapes: true,
     processEnvironments: true,
     skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
-    TeX: { equationNumbers: { autoNumber: "AMS" },
-         extensions: ["AMSmath.js", "AMSsymbols.js"] }
+  },
+  TeX: { equationNumbers: { autoNumber: "AMS" },
+         extensions: ["AMSmath.js", "AMSsymbols.js"] 
   }
 });
 
@@ -22,7 +23,46 @@ MathJax.Hub.Queue(function() {
         all[i].SourceElement().parentNode.className += ' has-jax';
     }
 });
+</script> -->
+<script>
+    MathJax = {
+        tex: {
+            inlineMath: [["$", "$"], ["\\(", "\\)"]],
+            displayMath: [["$$", "$$"]],
+            processEscapes: true,
+            processEnvironments: true,
+            tags: "ams",
+        },
+        options: {
+            skipHtmlTags: [
+                "script",
+                "noscript",
+                "style",
+                "textarea",
+                "pre",
+            ],
+        },
+        startup: {
+            ready: () => {
+                MathJax.startup.defaultReady();
+                // Fix <code> tags after MathJax finishes running
+                const all = MathJax.typesetPromise();
+                all.then(() => {
+                    document.querySelectorAll(".MathJax").forEach(
+                        (el) => {
+                            el.parentNode.className += " has-jax";
+                        },
+                    );
+                });
+            },
+        },
+    };
 </script>
+<script
+    id="MathJax-script"
+    async
+    src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js"
+></script>
 
 <style>
     /* 行内公式 */

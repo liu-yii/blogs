@@ -46,7 +46,7 @@ $$
 
 $$
 \begin{align}
-KL(p||q)&=H(p,q)-H(p) \\\\
+KL(p\parallel q)&=H(p,q)-H(p) \\\\
 &=-\sum_{i=1}^{n}p(x)\log q(x)+\sum_{i=1}^{n}p(x)\log p(x) \\\\
 &=-\sum_{i=1}^{n}p(x)\log \frac{q(x)}{p(x)}
 \end{align}
@@ -54,10 +54,10 @@ $$
 
 KL散度的特点：
 
-1. 非对称性：$KL(p||q)\neq KL(q||p)$  
-2. 非负性：$KL(p||q)\geq 0$
+1. 非对称性：$KL(p\parallel q)\neq KL(q\parallel p)$  
+2. 非负性：$KL(p\parallel q)\geq 0$
 
-*如果固定$p(x)$，那么$KL(p||q)=0 \Leftrightarrow p(x)=q(x)$。实际上这一点的证明要用到变分法，也是VAE中V的由来。*
+*如果固定$p(x)$，那么$KL(p\parallel q)=0 \Leftrightarrow p(x)=q(x)$。实际上这一点的证明要用到变分法，也是VAE中V的由来。*
 
 $$
 \begin{align}
@@ -74,7 +74,7 @@ $$
 $$
 
 $$
-KL(p||q)=\log\frac{\sigma_2}{\sigma_1}+\frac{\sigma_1^2+(\mu_1-\mu_2)^2}{2\sigma_2^2}-\frac{1}{2}
+KL(p\parallel q)=\log\frac{\sigma_2}{\sigma_1}+\frac{\sigma_1^2+(\mu_1-\mu_2)^2}{2\sigma_2^2}-\frac{1}{2}
 $$
 
 ### 高斯分布的重参数化
@@ -116,42 +116,52 @@ $$
 如何优化呢？我们的目标是希望$q(x)$能够逼近$\tilde{p}(x)$，这样的话就可以利用KL散度。具体来说，我们用$q(x,z)$来逼近$p(x,z)=\tilde{p}(x)p(z|x)$:
 
 $$
-KL(p(x,z)||q(x,z)) = \int\int p(x,z)\ln\frac{p(x,z)}{q(x,z)}dzdx
+KL(p(x,z)\parallel q(x,z)) = \int\int p(x,z)\ln\frac{p(x,z)}{q(x,z)}dzdx
 $$
 
 $$
-KL(p(x,z)||q(x,z)) = \int\tilde{p}(x)\left [\int p(z|x)\ln\frac{p(x,z)}{q(x,z)}dz\right ]dx \\
-=\mathbb{E}_{x\sim \tilde{p}(x)}\left [\int p(z|x)\ln\frac{p(x,z)}{q(x,z)}dz\right ]
+\begin{align}
+KL(p(x,z)\parallel q(x,z)) &= \int\tilde{p}(x)\left [\int p(z|x)\ln\frac{p(x,z)}{q(x,z)}dz\right ]dx \\\\
+&=\mathbb{E}_{x\sim \tilde{p}(x)}\left [\int p(z|x)\ln\frac{p(x,z)}{q(x,z)}dz\right ]
+\end{align}
 $$
+
 进一步省略$\tilde{p}(x)$带来的常数项：
+
 $$
-\mathcal{L} = KL(p(x,z)||q(x,z)) = \mathbb{E}_{x\sim \tilde{p}(x)}\left [\int p(z|x)\ln\frac{p(x|z)}{q(x,z)}dz\right ]
+\mathcal{L} = KL(p(x,z)\parallel q(x,z)) = \mathbb{E}_{x\sim \tilde{p}(x)}\left[\int p(z|x)\ln\frac{p(x|z)}{q(x,z)}dz\right]
 $$
 
-再将$q(x, z)= q(x|z)q(z)$代入，有：
-$$
-\mathcal{L} = \mathbb{E}_{x\sim \tilde{p}(x)}\left [\mathbb{E}_{z\sim p(z|x)}[-\ln q(x|z)] + KL(p(z|x) || q(z))\right ]
-$$
+再将 $q(x, z)= q(x|z)q(z)$ 代入，有：
 
-因此，我们目标就是优化$q(x|z)$和$q(z)$使得$\mathcal{L}$最小化。
-
-在代码实现过程中，$q(z)$假设为标准正态分布，$p(z|x),q(x|z)$分别对应Encoder和Decoder部分，都是未知的，这里我们都用神经网络来进行拟合。
-
-首先对于$p(z|x)$，我们假设其为均值为$\mu(x)$，方差为$\sigma^2(x)$的正态分布，$\mu(x)$和$\sigma^2(x)$为输入为$x$，输出为均值和方法的神经网络。因此loss中的KL散度项可以计算出来：
 $$
-KL(p(z|x) || q(z)) = \frac{1}{2}\sum^{d}_{k=1}(\mu^2_{(k)}(x)+\sigma^2_{(k)}(x)-\ln\sigma^2_{(k)}(x)-1)
+\mathcal{L} = \mathbb{E}\_{x\sim \tilde{p}(x)} \left [\mathbb{E}\_{z\sim p(z|x)}[-\ln q(x|z)] + KL(p(z|x) \parallel  q(z))\right ]
 $$
 
-对于$q(x|z)$，VAE论文给出了两种分布：伯努力分布以及正态分布，我们仍然以正态分布为例，仍然依靠神经网络估计均值和方差，$\tilde{\mu}(z)$，$\tilde{\sigma}^2(z)$，但是在这里我们通常会将方差固定为常数$\tilde{\sigma}^2$，因此：
+
+
+因此，我们目标就是优化 $q(x|z)$ 和 $q(z)$ 使得 $\mathcal{L}$ 最小化。
+
+在代码实现过程中，$q(z)$ 假设为标准正态分布，$p(z|x),q(x|z)$ 分别对应Encoder和Decoder部分，都是未知的，这里我们都用神经网络来进行拟合。
+
+首先对于 $p(z|x)$ ，我们假设其为均值为 $\mu(x)$，方差为 $\sigma^2(x)$ 的正态分布，$\mu(x)$ 和 $\sigma^2(x)$ 为输入为 $x$ ，输出为均值和方法的神经网络。因此loss中的KL散度项可以计算出来：
+
+$$
+KL(p(z|x)\parallel q(z)) = \frac{1}{2}\sum^{d}\_{k=1}(\mu^2_{(k)}(x)+\sigma^2_{(k)}(x)-\ln\sigma^2_{(k)}(x)-1)
+$$
+
+对于 $q(x|z)$ ，VAE论文给出了两种分布：伯努利分布以及正态分布，我们仍然以正态分布为例，仍然依靠神经网络估计均值和方差，$\tilde{\mu}(z)$，$\tilde{\sigma}^2(z)$，但是在这里我们通常会将方差固定为常数 $\tilde{\sigma}^2$ ，因此：
+
 $$
 -\ln q(x|z) \sim \frac{1}{2\tilde{\sigma}^2}||x-\tilde{\mu}(z)||^2
 $$
 
-在VAE中我们从$p(z|x)$采样一个样本进行训练，那么也就是说：
+在VAE中我们从 $p(z|x)$ 采样一个样本进行训练，那么也就是说：
 
 $$
-\mathcal{L} = \mathbb{E}_{x\sim \tilde{p}(x)}\left [-\ln q(x|z) + KL(p(z|x) || q(z))\right ]
+\mathcal{L} = \mathbb{E}_{x\sim \tilde{p}(x)}\left [-\ln q(x|z) + KL(p(z|x) \parallel  q(z))\right ]
 $$
+
 这样训练的loss也就能精确的计算出来了。
 
 
@@ -164,8 +174,10 @@ $$
 Given a data point sampled form a real data distribution $x_0 \sim q(x)$, we  define a **forward diffusion process**: we add small amount of Gaussian noise to the sample in $T$ steps, producing a sequence of noisy samples $x_1,...,x_T$. The step sizes are controlled by a variance schedule $\{\beta_{t}\in(0,1)\}_{t=1}^{T}$.
 
 $$
-q(x_t|x_{t-1}) = \mathcal{N}(x_t; \sqrt{1-\beta_t}x_{t-1}, \beta_t I)\\
-q(x_{1:T}|x_0) = \prod_{t=1}^{T}q(x_t|x_{t-1})
+\begin{align}
+q(x_t|x_{t-1}) &= \mathcal{N}(x_t; \sqrt{1-\beta_t}x_{t-1}, \beta_t I) \\\\
+q(x_{1:T}|x_0) &= \prod_{t=1}^{T}q(x_t|x_{t-1})
+\end{align}
 $$
 
 *这里的前向过程可以视为马尔可夫过程，即当前状态$x_t$只与上一时刻的状态$x_{t-1}$有关。在给定上一状态$x_{t-1}$的条件下，获取第$t$步样本$x_t$的概率分布q(x_t|x_{t-1})。$\mathcal{N}(x_t; \sqrt{1-\beta_t}x_{t-1}, \beta_t I)$ 表示给定上一步的状态$x_{t-1}$， $x_{t}$是一个以$\sqrt{1-\beta_t}x_{t-1}$为均值, $\beta_t I$为协方差的高斯分布的随机变量.*
@@ -179,43 +191,50 @@ At any arbitrary time step $t$, we can sample $x_t$ in above process. Let $\alph
 
 $$
 \begin{align}
-
-x_{t} &= \sqrt{\alpha_t}x_{t-1}+\sqrt{1-\alpha_{t}}\epsilon_{t} \\
+x_{t} &= \sqrt{\alpha\_t}x\_{t-1}+\sqrt{1-{\alpha}\_{t}}\epsilon\_{t} \\\\
 \nonumber
-&=\sqrt{\alpha_t\alpha_{t-1}}x_{t-2}+\sqrt{1-\alpha_{t}\alpha_{t-1}}\epsilon_{t-2} \\
+&=\sqrt{\alpha_t\alpha\_{t-1}}x\_{t-2}+\sqrt{1-\alpha\_{t}\alpha\_{t-1}}\epsilon\_{t-2} \\\\
 \nonumber
-&=...\\
+&=... \\\\
 \nonumber
-&=\sqrt{\bar{\alpha}_{t}}x_{0}+\sqrt{1-\bar{\alpha}_{t}}\epsilon \\
-q(x_t|x_0) &= \mathcal{N}(x_t; \sqrt{\bar{\alpha}_{t}}x_{0}, (1-\bar{\alpha}_{t})I)
+&=\sqrt{\bar{\alpha}\_{t}}x\_{0}+\sqrt{1-\bar{\alpha}\_{t}}\epsilon \\\\
+q(x\_t|x\_0) &= \mathcal{N}(x\_t; \sqrt{\bar{\alpha}\_{t}}x\_{0}, (1-\bar{\alpha}\_{t})I)
 \end{align}
 $$
 
 
 ### 反向扩散过程（去噪）
 If we can reverse the forward process and sample from $q(x_{t-1}|x_t)$, we will be able to recreate the true sample form a Gaussian noise input, $x_{T} \sim \mathcal{N}(0,I)$. Unfortunately, we cannot easily estimate $q(x_{t-1}|x_t)$ because it needs to use the entire dataset and therefore we need to learn a model $p_{\theta}$ to approximate these conditional probabilities in order to run the *reverse diffusion process*.
+
 $$
 \begin{align}
-p_{\theta}(x_{0:T}) &= p(x_T)\prod_{i=1}^{t}p_{\theta}(x_{t-1}|x_t)\\
+p_{\theta}(x_{0:T}) &= p(x_T)\prod_{i=1}^{t}p_{\theta}(x_{t-1}|x_t) \\\\
 p_{\theta}(x_{t-1}|x_t) &= \mathcal{N}(x_{t-1};\mu_{\theta}(x_t,t), \Sigma_{\theta}(x_t,t))
 \end{align}
 $$
 
 *如何学习这一过程呢？最简单的方法就是最小化$x_{t-1}$和$p_{\theta}(x_{t-1}|x_t)$之间的欧式距离*：
+
 $$
 ||x_{t-1}-p_{\theta}(x_{t-1}|x_t)||^{2}
 $$
+
 *继续细化这一过程，将前向过程可以改写为$x_{t-1}=\frac{1}{\sqrt{\alpha_t}}(x_t-\sqrt{1-\alpha_{t}}\epsilon_{t})$，因此模型$p_{\theta}$可以设计为*：
+
 $$
 p_{\theta}(x_{t-1}|x_t) = \frac{1}{\sqrt{\alpha_t}}(x_t-\sqrt{1-\alpha_{t}}\epsilon_{\theta}(x_t,t))
 $$
+
 *代入训练损失函数*：
+
 $$
 ||x_{t-1}-p_{\theta}(x_{t-1}|x_t)||^{2} = \frac{\beta_{t}}{\alpha_t}||\epsilon_{t}-\epsilon_{\theta}(x_t,t)||^{2}
 $$
-*忽略常数系数$\frac{\beta_{t}}{\alpha_t}$，然后代入$x_{t} = \sqrt{\bar{\alpha}_{t}}x_{0}+\sqrt{1-\bar{\alpha}_{t}}\epsilon$，最终得到的损失函数*：
+
+*忽略常数系数 $\frac{\beta\_{t}}{\alpha\_t}$，然后代入 $x_{t} = \sqrt{\bar{\alpha}\_{t}}x\_{0}+\sqrt{1-\bar{\alpha}\_{t}}\epsilon$，最终得到的损失函数*：
+
 $$
-||\epsilon_{t}-\epsilon_{\theta}(\sqrt{\bar{\alpha}_{t}}x_{0}+\sqrt{1-\bar{\alpha}_{t}}\epsilon_{t},t)||^{2}
+||\epsilon\_{t}-\epsilon\_{\theta}(\sqrt{\bar{\alpha}\_{t}}x\_{0}+\sqrt{1-\bar{\alpha}\_{t}}\epsilon\_{t},t)||^{2}
 $$
 
 ### DDIM
