@@ -61,6 +61,7 @@ params:
   # 是否禁用主题切换按钮
   disableThemeToggle: false
   math: true
+  customCSS: ["assets/css/core/theme-vars.css"] # 自定义 CSS 文件
 
   # 是否启用阅读时间展示
   ShowReadingTime: true

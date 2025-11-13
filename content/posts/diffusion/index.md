@@ -1,7 +1,7 @@
 ---
 date: 2025-06-16T14:45:29+08:00
 draft: false
-title: 'Diffusion'
+title: '生成模型漫谈'
 ---
 
 ## Preliminary Knowledge
