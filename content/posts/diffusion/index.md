@@ -46,7 +46,7 @@ $$
 
 $$
 \begin{align}
-D_{KL}(p||q)&=H(p,q)-H(p) \\\\
+KL(p||q)&=H(p,q)-H(p) \\\\
 &=-\sum_{i=1}^{n}p(x)\log q(x)+\sum_{i=1}^{n}p(x)\log p(x) \\\\
 &=-\sum_{i=1}^{n}p(x)\log \frac{q(x)}{p(x)}
 \end{align}
@@ -54,8 +54,10 @@ $$
 
 KL散度的特点：
 
-1. 非对称性：$D_{KL}(p||q)\neq D_{KL}(q||p)$  
-2. 非负性：$D_{KL}(p||q)\geq 0$
+1. 非对称性：$KL(p||q)\neq KL(q||p)$  
+2. 非负性：$KL(p||q)\geq 0$
+
+*如果固定$p(x)$，那么$KL(p||q)=0 \Leftrightarrow p(x)=q(x)$。实际上这一点的证明要用到变分法，也是VAE中V的由来。*
 
 $$
 \begin{align}
@@ -72,7 +74,7 @@ $$
 $$
 
 $$
-D_{KL}(p||q)=\log\frac{\sigma_2}{\sigma_1}+\frac{\sigma_1^2+(\mu_1-\mu_2)^2}{2\sigma_2^2}-\frac{1}{2}
+KL(p||q)=\log\frac{\sigma_2}{\sigma_1}+\frac{\sigma_1^2+(\mu_1-\mu_2)^2}{2\sigma_2^2}-\frac{1}{2}
 $$
 
 ### 高斯分布的重参数化
@@ -83,52 +85,81 @@ $$
 
 ---
 
-## VAE 与多层 VAE
+## VAE
 
 ### 单层 VAE
 
 ![VAE 结构图](img/VAE.png)
 
+VAE以及其他生成模型的结构如上图所示。
+首先我们先回顾一下VAE在干什么：
+
+我们有一批数据样本$\{x_1,x_2,...,x_n\}$，对这个整体我们用$x$描述，我们的理想情况是得到$x$的分布$\tilde{p}(x)$，这样我们就可以直接根据$\tilde{p}(x)$来采样得到所有可能的$x$了，但是这显然很难实现。因此我们引入了$z$，$z$服从标准正态分布$\mathcal{N}(0,I)$，也就是说，我们可以先从标准正态分布中采样一个$z$，然后训练一个模型$q_{\theta}(x|z)$来算出$x$，用苏神的图解释该过程
+![vae的传统理解](img/vae01.png)
+
 $$
-p(x)=\int_{z} p(x, z)
+q(x)=\int q_{\theta}(x|z)q(z)dz
 $$
 
 $$
-p(x)=\int_{z} p_{\theta}(x|z)p(z)
+q(x, z)= q(x|z)q(z)
+$$
+
+但是，实际上这个过程是存在问题的，我们并不清楚在标准正态分布中采样得到$z_{k}$是否对应原来的$x_{k}$，因此，我们不能简单地最小化$x_{k}$和$\hat{x}_{k}$之间的距离。
+
+实际上在VAE中，我们假设的是后验分布$p(z|x)$为正态分布，也就是说，给定一个样本$x_k$，我们假设存在一个专属于$x_k$的分布$p(z|x_k)$，并且假设其为正态分布。这样我们从这个分布中采样出来的$z_k$可以确定是与$x_k$对应的。
+
+那么如何得到这个专属的分布呢？既然已经假设他是一个正态分布了，那我们就只要知道他的均值$\mu$ 和方差$\sigma^2$就行了。怎么算均值和方差呢？那就用神经网络拟合出来吧！
+![构建专属的正态分布](img/vae02.png)
+
+
+如何优化呢？我们的目标是希望$q(x)$能够逼近$\tilde{p}(x)$，这样的话就可以利用KL散度。具体来说，我们用$q(x,z)$来逼近$p(x,z)=\tilde{p}(x)p(z|x)$:
+
+$$
+KL(p(x,z)||q(x,z)) = \int\int p(x,z)\ln\frac{p(x,z)}{q(x,z)}dzdx
 $$
 
 $$
-p(x)=\int_{z} q_{\phi}(z|x)\frac{p_{\theta}(x|z)p(z)}{q_{\phi}(z|x)}
+KL(p(x,z)||q(x,z)) = \int\tilde{p}(x)\left [\int p(z|x)\ln\frac{p(x,z)}{q(x,z)}dz\right ]dx \\
+=\mathbb{E}_{x\sim \tilde{p}(x)}\left [\int p(z|x)\ln\frac{p(x,z)}{q(x,z)}dz\right ]
+$$
+进一步省略$\tilde{p}(x)$带来的常数项：
+$$
+\mathcal{L} = KL(p(x,z)||q(x,z)) = \mathbb{E}_{x\sim \tilde{p}(x)}\left [\int p(z|x)\ln\frac{p(x|z)}{q(x,z)}dz\right ]
 $$
 
+再将$q(x, z)= q(x|z)q(z)$代入，有：
 $$
-\begin{align}
-\log p(x) &= \log \int_{z} q_{\phi}(z|x)\frac{p_{\theta}(x|z)p(z)}{q_{\phi}(z|x)} \\
-\nonumber
-&= \log \mathbb{E}_{z\sim q_{\phi}(z|x)}\left[\frac{p_{\theta}(x|z)p(z)}{q_{\phi}(z|x)}\right]
-\end{align}
+\mathcal{L} = \mathbb{E}_{x\sim \tilde{p}(x)}\left [\mathbb{E}_{z\sim p(z|x)}[-\ln q(x|z)] + KL(p(z|x) || q(z))\right ]
 $$
 
+因此，我们目标就是优化$q(x|z)$和$q(z)$使得$\mathcal{L}$最小化。
+
+在代码实现过程中，$q(z)$假设为标准正态分布，$p(z|x),q(x|z)$分别对应Encoder和Decoder部分，都是未知的，这里我们都用神经网络来进行拟合。
+
+首先对于$p(z|x)$，我们假设其为均值为$\mu(x)$，方差为$\sigma^2(x)$的正态分布，$\mu(x)$和$\sigma^2(x)$为输入为$x$，输出为均值和方法的神经网络。因此loss中的KL散度项可以计算出来：
 $$
-\begin{align}
-\log p(x) &\ge \mathbb{E}_{z\sim q_{\phi}(z|x)}\left[\log \frac{p_{\theta}(x|z)p(z)}{q_{\phi}(z|x)}\right] \\
-\nonumber
-&= \mathbb{E}_{z\sim q_{\phi}(z|x)}[\log p_{\theta}(x|z)] - D_{KL}(q_{\phi}(z|x) || p(z))
-\end{align}
+KL(p(z|x) || q(z)) = \frac{1}{2}\sum^{d}_{k=1}(\mu^2_{(k)}(x)+\sigma^2_{(k)}(x)-\ln\sigma^2_{(k)}(x)-1)
 $$
 
+对于$q(x|z)$，VAE论文给出了两种分布：伯努力分布以及正态分布，我们仍然以正态分布为例，仍然依靠神经网络估计均值和方差，$\tilde{\mu}(z)$，$\tilde{\sigma}^2(z)$，但是在这里我们通常会将方差固定为常数$\tilde{\sigma}^2$，因此：
+$$
+-\ln q(x|z) \sim \frac{1}{2\tilde{\sigma}^2}||x-\tilde{\mu}(z)||^2
+$$
 
+在VAE中我们从$p(z|x)$采样一个样本进行训练，那么也就是说：
 
-第一项为重建项，第二项为正则化项。
+$$
+\mathcal{L} = \mathbb{E}_{x\sim \tilde{p}(x)}\left [-\ln q(x|z) + KL(p(z|x) || q(z))\right ]
+$$
+这样训练的loss也就能精确的计算出来了。
 
-### 多层 VAE
-
-（待更新）
 
 ---
 
 ## Diffusion Models
-主要参考了[Lil's Log](https://lilianweng.github.io/posts/2021-07-11-diffusion-models/#quick-summary)
+主要参考了[Lil's Log](https://lilianweng.github.io/posts/2021-07-11-diffusion-models/#quick-summary)，苏神的[生成扩散模型漫谈系列](https://spaces.ac.cn/)
+### DDPM
 ### 前向扩散过程（加噪）
 Given a data point sampled form a real data distribution $x_0 \sim q(x)$, we  define a **forward diffusion process**: we add small amount of Gaussian noise to the sample in $T$ steps, producing a sequence of noisy samples $x_1,...,x_T$. The step sizes are controlled by a variance schedule $\{\beta_{t}\in(0,1)\}_{t=1}^{T}$.
 
@@ -187,6 +218,8 @@ $$
 ||\epsilon_{t}-\epsilon_{\theta}(\sqrt{\bar{\alpha}_{t}}x_{0}+\sqrt{1-\bar{\alpha}_{t}}\epsilon_{t},t)||^{2}
 $$
 
+### DDIM
 
 ## Conditioned Generation
 ### Classifier Guided Diffusion 
+updating.....
