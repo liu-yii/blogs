@@ -109,3 +109,43 @@ q_{d-1}
 $$
 
 即给位置为 $m$ 的向量 $q$ 乘上矩阵 $R_m$, 给位置为 $n$ 的向量 $k$ 乘上矩阵 $R_{n}$，然后用变换后的 $Q,K$ 序列做Attention计算，Attention中就自动包含相对位置信息了。
+
+由于矩阵 $R_{n}$的稀疏性，在具体实现的过程中可以用下面的方式：
+$$
+\begin{pmatrix}
+  q_{0} \\\\
+  q_{1} \\\\
+  q_{2} \\\\
+  q_{3} \\\\
+  \cdots \\\\
+  q_{d-2} \\\\
+  q_{d-1} \\\\
+\end{pmatrix} \otimes
+\begin{pmatrix}
+  \cos m\theta\_{0} \\\\
+  \cos m\theta\_{0} \\\\
+  \cos m\theta\_{1} \\\\
+  \cos m\theta\_{1} \\\\
+  \cdots \\\\
+  \cos m\theta\_{d/2-1} \\\\
+  \cos m\theta\_{d/2-1} \\\\
+\end{pmatrix}+
+\begin{pmatrix}
+  -q_{1} \\\\
+  q_{0} \\\\
+  -q_{3} \\\\
+  q_{2} \\\\
+  \cdots \\\\
+  q_{d-1} \\\\
+  q_{d-2} \\\\
+\end{pmatrix} \otimes
+\begin{pmatrix}
+  \sin m\theta\_{0} \\\\
+  \sin m\theta\_{0} \\\\
+  \sin m\theta\_{1} \\\\
+  \sin m\theta\_{1} \\\\
+  \cdots \\\\
+  \sin m\theta\_{d/2-1} \\\\
+  \sin m\theta\_{d/2-1} \\\\
+\end{pmatrix}
+$$
