@@ -168,8 +168,8 @@ class RotaryEmbedding(nn.Module):
         cos_pos = self.cos_pos_cache[:seq_len].to(q.device)
         sin_pos = self.sin_pos_cache[:seq_len].to(q.device)
 
-        cos_pos = cos_pos.unsqueeze(0).unsqueeze(0)
-        sin_pos = sin_pos.unsqueeze(0).unsqueeze(0)
+        cos_pos = cos_pos.unsqueeze(0)
+        sin_pos = sin_pos.unsqueeze(0)
 
         q2 = torch.stack([-q[..., 1::2], q[..., ::2]], dim=-1)
         q2 = q2.reshape(q.shape).contiguous()
