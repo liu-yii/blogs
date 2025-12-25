@@ -30,5 +30,5 @@ $$
 ```
 git add -A
 git commit -m "new post"
-git push
+git push -u origin main
 ```
