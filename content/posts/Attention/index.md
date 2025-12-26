@@ -168,8 +168,9 @@ class RotaryEmbedding(nn.Module):
         cos_pos = self.cos_pos_cache[:seq_len].to(q.device)
         sin_pos = self.sin_pos_cache[:seq_len].to(q.device)
 
-        cos_pos = cos_pos.unsqueeze(0)
-        sin_pos = sin_pos.unsqueeze(0)
+        q = q.reshape(bs,seq_len,self.num_heads,-1).transpose(1, 2)
+        cos_pos = cos_pos.repeat(bs,self.num_heads, *([1]*len(cos_pos.shape)))
+        sin_pos = sin_pos.repeat(bs,self.num_heads, *([1]*len(sin_pos.shape)))
 
         q2 = torch.stack([-q[..., 1::2], q[..., ::2]], dim=-1)
         q2 = q2.reshape(q.shape).contiguous()
@@ -207,8 +208,8 @@ class MultiHeadLatentAttention(nn.Module):
         self.output = nn.Linear(num_heads*self.v_head_dim, hidden_size)
         self.res_dropout = nn.Dropout(drop_out)
 
-    def forward(self, x, attention_mask = None):
-        B, L, C = x.shape
+    def forward(self, h, attention_mask = None):
+        B, L, C = h.shape
 
         # step1: 低秩转换
         c_t_kv = self.down_proj_kv(h) # [B, L, down_dim]
