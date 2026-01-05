@@ -310,12 +310,12 @@ $$
 可以代入 $\eqref{eq_ddim}$，同时将$x_0$替换为用$x_t$推导的形式(和DDPM一样)，最终得到：
 $$
 \begin{align}
-q(x_{t-1}|x_t) \approx \mathcal{N}\left({x}\_{t-1};\frac{1}{\alpha\_t}\left(x_t-\left(\bar\beta_t-\alpha_t\sqrt{\bar\beta_{t-1}^2-\sigma_t^2}\right)\epsilon\_{\theta}(x_t, t)\right),\sigma_t^2 I\right)
+q(x_{t-1}|x_t) \approx \mathcal{N}\left({x}\_{t-1};\frac{x_t-\bar\beta_t}{\alpha\_t} \epsilon\_{\theta}(x_t, t) + \sqrt{\bar\beta_{t-1}^2-\sigma_t^2}\epsilon\_{\theta}(x_t, t),\sigma_t^2 I\right)
 \end{align}
 $$
 
 ### SDE
-
+updating.....
 
 ## Conditioned Generation
 ### Classifier Guided Diffusion 
