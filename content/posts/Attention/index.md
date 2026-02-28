@@ -37,13 +37,14 @@ class  MultiHeadAttention(nn.Module):
         if attention_mask is not None:
             attention = attention.masked_fill(attention_mask[:,None,None,:]==0, float('-inf'))
         
-        attention = self.dropout(attention.softmax(dim=-1)) 
-        context = torch.matmul(attntion, value) #[B, head, L, head_dim]
+        attention = self.dropout(attention.softmax(dim=-1))
+        context = torch.matmul(attntion, v) #[B, head, L, head_dim]
 
         context = context.transpose(1,2).contiguous().view(B, L, C) #[B, L, C]
         out = self.output(context)
         return out
 ```
+
 
 ## MQA (Multi-Query Attention)
 ```python
@@ -81,7 +82,7 @@ class  MultiQueryAttention(nn.Module):
             attention = attention.masked_fill(attention_mask[:,None,None,:]==0, float('-inf'))
         
         attention = self.dropout(attention.softmax(dim=-1)) 
-        context = torch.matmul(attntion, value) #[B, head, L, head_dim]
+        context = torch.matmul(attntion, v) #[B, head, L, head_dim]
 
         context = context.transpose(1,2).contiguous().view(B, L, C) #[B, L, C]
         out = self.output(context)
@@ -131,7 +132,7 @@ class GroupedQueryAttention(nn.Module):
             attention = attention.masked_fill(attention_mask[:,None,None,:]==0, float('-inf'))
         attention = self.dropout(torch.softmax(attention, dim=-1))
 
-        context = torch.matmul(attention, value) # [B, heads, L, head_dim]
+        context = torch.matmul(attention, v) # [B, heads, L, head_dim]
         context = context.transpose(1,2).contiguous().view(B, L, C)
 
         out = self.output(context)
@@ -248,3 +249,75 @@ class MultiHeadLatentAttention(nn.Module):
 
 
 ```
+
+
+<!-- ```python
+import torch
+import torch.nn as nn
+
+#MHA
+class MultiheadAttention(nn.Module):
+    def __init__(self, d_model, n_heads, drop_out=0.0):
+        super().__init__()
+        assert d_model%n_heads == 0
+        self.d_model = d_model
+        self.n_heads = n_heads
+        self.head_dim = d_model//n_heads
+        self.W_q = nn.Linear(d_model, d_model)
+        self.W_k = nn.Linear(d_model, d_model)
+        self.W_v = nn.Linear(d_model, d_model)
+
+        self.dropout = nn.Dropout(drop_out)
+        self.output = nn.Linear(d_model, d_model)
+    
+    def forward(self, x, attention_mask=None):
+        b,l,d = x.shape
+        q = self.W_q(x).view(b,l,self.n_heads,self.head_dim).permute(0,2,1,3)  # B,n,L,d
+        k = self.W_k(x).view(b,l,self.n_heads,self.head_dim).permute(0,2,1,3)  # B,n,L,d
+        v = self.W_v(x).view(b,l,self.n_heads,self.head_dim).permute(0,2,1,3)  # B,n,L,d
+
+        attention = torch.matmul(q, k.transpose(-1,-2))/(self.head_dim**0.5)
+        if attention_mask is not None:
+            attention = attention.masked_fill(attention_mask[:,None,None,:]==0, float('-inf'))
+
+        attention = self.dropout(attention.softmax(dim=-1))
+        context = torch.matmul(attention, v)
+        context = context.permute(0,2,1,3).contiguous.view(b,l,d)
+        out = self.output(context)
+        return out
+
+#MQA
+class MultiQueryAttention(nn.Module):
+    def __init__(self, d_model, n_heads, drop_out=0.0):
+        super().__init__()
+        assert d_model%n_heads==0
+        self.d_model = d_model
+        self.n_heads = n_heads
+        self.head_dim = d_model//n_heads
+        self.W_q = nn.Linear(d_model, d_model)
+        self.W_k = nn.Linear(d_model, self.head_dim)
+        self.W_v = nn.Linear(d_model, self.head_dim)
+
+        self.dropout = nn.Dropout(drop_out)
+        self.output = nn.Linear(d_model, d_model)
+    
+    def forward(self, x, attention_mask=None):
+        b,l,d = x.shape
+        q = self.W_q(x).view(b,l,self.n_heads, self.head_dim).permute(0,2,1,3)
+        w = self.W_k(x)
+        v = self.W_v(x)
+
+        w = w.unsqueeze(1).expand(-1,self.n_heads,-1,-1)
+        v = v.unsqueeze(1).expand(-1,self.n_heads,-1,-1)
+
+        attention = torch.matmul(q,k.permute(0,1,3,2))/(self.head_dim**0.5)
+        if attention_mask is not None:
+            attention = attention.masked_fill(attention_mask[:,None,None,:]==0, float('-inf'))
+        
+        attention = self.dropout(attention.softmax(dim=-1))
+        context = torch.matmul(attention,v)
+        context = context.permute(0,2,1,3).contiguous().view(b,l,d)
+
+        out = self.output(context)
+        return out
+``` -->

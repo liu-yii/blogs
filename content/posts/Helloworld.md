@@ -28,6 +28,7 @@ $$
 
 ## push to github
 ```
+git pull
 git add -A
 git commit -m "new post"
 git push -u origin main
