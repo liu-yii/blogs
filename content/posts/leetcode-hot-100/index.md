@@ -56,7 +56,123 @@ class Solution:
             return root
         return left or right
 ```
+## [LC437.路径总和II](https://leetcode.cn/problems/path-sum-ii/description/?envType=problem-list-v2&envId=2cktkvj&)
+**给定一个二叉树, 找到该树中两个指定节点的最近公共祖先。**
+题解：
+```python
+class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
 
+class Solution:
+    def pathSum(self, root, targetSum):
+        ans = []
+        path = []
+        def dfs(node, target):
+            if node is None:
+                return
+            target-=node.val
+            path.append(node.val)
+            if node.left is None and node.right is None and target==0:
+                ans.append(path.copy())
+            else:
+                dfs(node.left, target)
+                dfs(node.right, target)
+            path.pop()
+        dfs(root, targetSum)
+        return ans
+```
+
+## [LC236.二叉树的最近公共祖先](https://leetcode.cn/problems/lowest-common-ancestor-of-a-binary-tree/description/?envType=problem-list-v2&envId=2cktkvj&)
+**给定一个二叉树, 找到该树中两个指定节点的最近公共祖先。**
+题解：临界条件：当前节点是空/p/q
+
+如果左右子树都找到了，返回当前节点，如果只有左子树有结果，返回递归左子树的结果，相反返回右子树的递归结果。
+```python
+class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
+
+class Solution:
+    def lowestCommonAncestor(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode') -> 'TreeNode':
+        def dfs(node, p, q):
+            if node is p or node is q or node is None:
+                return node
+            left = dfs(node.left, p, q)
+            right = dfs(node.right, p, q)
+            if left and right:
+                return node
+            return left or right
+        return dfs(root, p, q)
+```
+
+## [LC124.二叉树中的最大路径和](https://leetcode.cn/problems/binary-tree-maximum-path-sum/description/?envType=problem-list-v2&envId=2cktkvj&)
+**给定一个非空二叉树，返回其最大路径和。**
+题解：
+```python
+class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
+    
+class Solution:
+    def maxPathSum(self, root: Optional[TreeNode]) -> int:
+        ans = -inf
+        def dfs(node):
+            nonlcoal ans
+            if node is None:
+                return 0
+            left = dfs(node.left)
+            right = dfs(node.right)
+            ans = max(ans, left+right+node.val)
+            return max(max(left, right)+node.val, 0)
+        dfs(root)
+        return ans
+```
+
+## [LC199.二叉树的右视图](https://leetcode.cn/problems/binary-tree-right-side-view/description/?envType=problem-list-v2&envId=2cktkvj&)
+**给定一个二叉树的 根节点 root，想象自己站在它的右侧，按照从顶部到底部的顺序，返回从右侧所能看到的节点值。**
+
+题解：层序遍历，每次取每一层的最后一个节点。
+```python
+class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
+    
+class Solution:
+    # DFS先递归右子树
+    def rightSideView(self, root: Optional[TreeNode]) -> List[int]:
+        ans = []
+        def dfs(node, depth):
+            if node is None:
+                return
+            if len(ans)==depth:
+                ans.append(node.val)
+            dfs(node.right, depth+1)
+            dfs(node.left, depth+1)
+        dfs(root, 0)
+        return ans
+    # BFS层序遍历
+    def rightSideViewBFS(self, root: Optional[TreeNode]) -> List[int]:
+        ans = []
+        if root is None: return ans
+        q = [root]
+        while q:
+            ans.append(q[-1].val)
+            tmp = q
+            q = []
+            for node in tmp:
+                if node.left: q.append(node.left)
+                if node.right: q.append(node.right)
+        return ans
+```
 
 # 回溯
 
@@ -248,6 +364,8 @@ class Solution:
             
         return -1 if cnt else ans
 ```
+
+
 
 
 

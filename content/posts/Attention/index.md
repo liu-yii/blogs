@@ -165,13 +165,12 @@ class RotaryEmbedding(nn.Module):
 
 
     def forward(self, q):
-        bs, seq_len, _ = q.shape
+        bs, seq_len = q.shape[0], q.shape[2]
         cos_pos = self.cos_pos_cache[:seq_len].to(q.device)
         sin_pos = self.sin_pos_cache[:seq_len].to(q.device)
 
-        q = q.reshape(bs,seq_len,self.num_heads,-1).transpose(1, 2)
-        cos_pos = cos_pos.repeat(bs,self.num_heads, *([1]*len(cos_pos.shape)))
-        sin_pos = sin_pos.repeat(bs,self.num_heads, *([1]*len(sin_pos.shape)))
+        cos_pos = cos_pos.unsqueeze(0).unsqueeze(0)
+        sin_pos = sin_pos.unsqueeze(0).unsqueeze(0)
 
         q2 = torch.stack([-q[..., 1::2], q[..., ::2]], dim=-1)
         q2 = q2.reshape(q.shape).contiguous()
@@ -226,7 +225,7 @@ class MultiHeadLatentAttention(nn.Module):
         q_t_r = self.rope_q(q_t_r)
 
         k_t_r = self.proj_kr(h).unsqueeze(1) # [B, 1, L, rope_head_dim]
-        k_t_r = self.rope_k(k_t_r)
+        k_t_r = self.rope_k(k_t_r) 
 
         # step3: 注意力计算
         q_t_c = q_t_c.view(B, L, self.num_heads, self.v_head_dim).transpose(1, 2)
@@ -235,6 +234,7 @@ class MultiHeadLatentAttention(nn.Module):
         k_t_c = k_t_c.view(B, L, self.num_heads, self.v_head_dim).transpose(1, 2)
         k_t_r = k_t_r.expand(-1, self.num_heads, -1, -1)
         k = torch.cat([k_t_c, k_t_r], dim=-1)
+        v_t_c = v_t_c.view(B, L, self.num_heads, self.v_head_dim).transpose(1, 2)
 
         scores = torch.matmul(q,k.transpose(-1,-2))/ (math.sqrt(self.head_dim) + math.sqrt(self.rope_head_dim))
 
@@ -320,4 +320,136 @@ class MultiQueryAttention(nn.Module):
 
         out = self.output(context)
         return out
+
+## GQA
+class GroupedQueryAttention(nn.Module):
+    def __init__(self, d_model, n_heads, group_size = 2, drop_out=0.0):
+        super().__init__()
+        assert d_model%n_heads==0
+        assert n_heads%group_size==0
+        self.d_model = d_model
+        self.n_heads = n_heads
+        self.group_size = group_size
+        self.head_dim = d_model//n_heads
+        self.n_groups = self.n_heads//group_sizev = v.expand(-1,self.group_size,-1,-1)
+
+        self.W_q = nn.Linear(d_model, d_model)
+        self.W_k = nn.Linear(d_model, self.head_dim*self.n_groups)
+        self.W_v = nn.Linear(d_model, self.head_dim*self.n_groups)
+
+        self.dropout = nn.Dropout(drop_out)
+        self.output = nn.Linear(d_model, d_model)
+
+    def forward(self, x, attention_mask=None):
+        b,l,d = x.shape
+        q = self.W_q(x).view(b,l,self.n_heads, self.head_dim).permute(0,2,1,3)
+        w = self.W_k(x).view(b,l,self.n_groups, self.head_dim).permute(0,2,1,3) # B, n_g, L, d
+        v = self.W_v(x).view(b,l,self.n_groups, self.head_dim).permute(0,2,1,3)
+
+        w = w.unsqueeze(2).expand(-1,-1,self.group_size,-1,-1).contiguous().view(b,-1,l,self.head_dim)
+        v = v.unsqueeze(2).expand(-1,-1,self.group_size,-1,-1).contiguous().view(b,-1,l,self.head_dim)
+
+        attention = torch.matmul(q,k.permute(0,1,3,2))/(self.head_dim**0.5)
+        if attention_mask is not None:
+            attention = attention.masked_fill(attention_mask[:,None,None,:]==0, float('-inf'))
+        
+        attention = self.dropout(attention.softmax(dim=-1))
+        context = torch.matmul(attention,v)
+        context = context.permute(0,2,1,3).contiguous().view(b,l,d)
+
+        out = self.output(context)
+        return out
+
+
+# MLA
+class RotaryEmbedding(nn.Module):
+    def __init__(self, hidden_size, n_head, base=10000, max_len=512):
+        super().__init__()
+        self.head_dim = hidden_size//n_head
+        self.base = base
+        self.max_len = max_len
+        self.cos_cache, self.sin_cache = self._compute_pos_emb()
+
+
+    def _compute_pos_emb(self):
+        theta_i = 1./(base**(torch.arrange(0, self.head_dim, 2).float()/self.head_dim))
+        pos = torch.arrange(0,max_len)
+        emb = pos.unsqueeze(1)*theta_i.unsqueeze(0)
+        cos_emb = emb.cos().repeat_interleave(2, dim=-1)
+        sin_emb = emb.sin().repeat_interleave(2, dim=-1)
+        return cos_emb, sin_emb
+
+    def forward(self, x):
+        b, l = x.shape[0], x.shape[2]
+        cos_emb = self.cos_cache[:l].to(x.device)
+        sin_emb = self.sin_cache[:l].to(x.device)
+
+        cos_emb = cos_emb.unsqueeze(0).unsqueeze(0)
+        sin_emb = sin_emb.unsqueeze(0).unsqueeze(0)
+
+        q2 = torch.stack([-q[..., 1::2], q[..., ::2]], dim=-1)
+        q2 = q2.reshape(q.shape).contiguous()
+        return q*cos_emb + q2*sin_emb
+
+class MultiLatentAttention(nn.Module):
+    def __init__(self, d_model, down_dim, up_dim, n_head, rope_headdim, drop_out=0.0):
+        super().__init__()
+        self.n_head = n_head
+        self.rope_headdim = rope_headdim
+        self.up_dim = up_dim
+        self.down_proj_q = nn.Linear(d_model, down_dim)
+        self.down_proj_kv = nn.Linear(d_model, down_dim)
+
+        self.head_dim = up_dim//n_head
+        self.up_proj_q = nn.Linear(down_dim, up_dim)
+        self.up_proj_k = nn.Linear(down_dim, up_dim)
+        self.up_proj_v = nn.Linear(down_dim, up_dim)
+
+        self.r_proj_q = nn.Linear(up_dim, rope_headdim*n_head)
+        self.r_proj_k = nn.Linear(up_dim, rope_headdim)
+        self.rope_q = RotaryEmbedding(rope_headdim*n_head, n_head)
+        self.rope_k = RotaryEmbedding(rope_headdim, 1)
+
+        self.dropout = nn.Dropout(drop_out)
+        self.output = nn.Linear(up_dim, d_model)
+        self.res_dropout = nn.Dropout(drop_out)
+
+    def forward(x, attention_mask=None):
+        b,l,d = x.shape
+        # compress
+        c_q = self.down_proj_q(x)
+        c_kv = self.down_proj_kv(x)
+
+        q_c = self.up_proj_q(c_q)
+        k_c = self.up_proj_k(c_kv)
+        v_c = self.up_proj_v(c_kv)
+
+        # rope
+        q_r = self.r_proj_q(c_q).view(b, l, self.n_head, self.rope_headdim).permute(0,2,1,3) # B,n,L,rope_d
+        q_r = self.rope_q(q_r)
+        k_r = self.r_proj_k(x).view(b, l, 1, self.rope_headdim).permute(0,2,1,3)  # B,L,rope_d
+        k_r = self.rope_k(k_r)
+
+        q_c = q_c.view(b, l, self.n_head, self.head_dim).permute(0,2,1,3)
+        q = torch.cat([q_c, q_r], dim=-1)
+
+        k_c = k_c.view(b, l, self.n_head, self.head_dim).permute(0,2,1,3)
+        k_r = k_r.expand(-1, self.n_head, -1, -1)
+        k = torch.cat([k_c, k_r], dim=-1)
+
+        v = v_c.view(b, l, self.n_head, self.head_dim).permute(0,2,1,3)
+
+        score = torch.matmul(q, k.transpose(-1,-2))/(self.head_dim**0.5+self.rope_headdim**0.5)
+        if attention_mask is not None:
+            score = score.masked_fill(attention_mask[:,None,None,:]==0, float("-inf"))
+        score = self.dropout(score.softmax(dim=-1))
+        context = torch.matmul(score, v)
+
+        context = context.permute(0,2,1,3).contiguous().view(b,l,self.up_dim)
+
+        out = self.res_dropout(self.output(context))
+        return out
+
+
+        
 ``` -->
