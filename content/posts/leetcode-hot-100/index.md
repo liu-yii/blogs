@@ -365,7 +365,209 @@ class Solution:
         return -1 if cnt else ans
 ```
 
+# 滑动窗口
+## [LC3. 无重复字符的最长子串](https://leetcode.cn/problems/longest-substring-without-repeating-characters/description/?envType=problem-list-v2&envId=2cktkvj&)
+**给定一个字符串 s ，请你找出其中不含有重复字符的 最长子串 的长度。**
 
+题解：
+```python
+class Solution:
+    def lengthOfLongestSubstring(self, s: str) -> int:
+        cnt = defaultdict(int)
+        ans = 0
+        left = 0
+        for i, c in enumerate(s):
+            cnt[c]+=1
+            while cnt[c]>1:
+                cnt[s[left]]-=1
+                if cnt[s[left]]==0: cnt.pop(s[left])
+                left+=1
+            ans = max(ans, i-left+1)
+        return ans  
+```
+
+## [LC438. 找到字符串中所有字母异位词](https://leetcode.cn/problems/find-all-anagrams-in-a-string/description/?envType=problem-list-v2&envId=2cktkvj&)
+**给定两个字符串 s 和 p，找到 s 中所有 p 的 异位词 的子串，返回这些子串的起始索引。不考虑答案输出的顺序。**
+
+题解：
+```python
+class Solution:
+    def findAnagrams(self, s: str, p: str) -> List[int]:
+        target = Counter(p)
+        cnt = Counter()
+        left = 0
+        ans = []
+        for i, c in enumerate(s):
+            cnt[c]+=1
+            while cnt>target:
+                cnt[s[left]]-=1
+                if cnt[s[left]]==0: cnt.pop(s[left])
+                left+=1
+            if cnt==target: ans.append(left)
+        return ans
+```
+
+# 双指针
+## [LC15.三数之和](https://leetcode.cn/problems/3sum/description/?envType=problem-list-v2&envId=2cktkvj&)
+**给你一个整数数组 nums ，判断是否存在三元组 [nums[i], nums[j], nums[k]] 满足 i != j、i != k 且 j != k ，同时还满足 nums[i] + nums[j] + nums[k] == 0 。请你返回所有和为 0 且不重复的三元组。**
+
+题解：
+```python
+
+class Solution:
+    def threeSum(self, nums: list[int]) -> list[list[int]]:
+        nums.sort()
+        n = len(nums)
+        ans = []
+        for i in range(n-2):
+            x = nums[i]
+            if i>0 and x==nums[i-1]:
+                continue
+            if x+nums[i+1]+nums[i+2]>0:
+                break
+            if x+nums[-2]+nums[-1]<0:
+                continue
+            left = i+1
+            right = n-1
+            while left<right:
+                s = nums[i]+nums[left]+nums[right]
+                if s<0:
+                    left+=1
+                elif s>0:
+                    right-=1
+                else:
+                    ans.append([x, nums[left], nums[right]])
+                    left+=1
+                    while left<right and nums[left-1]==nums[left]:
+                        left+=1
+                    right-=1
+                    while left<right and nums[right+1]==nums[right]:
+                        right-=1
+        return ans
+```
+
+## [LC42. 接雨水](https://leetcode.cn/problems/trapping-rain-water/description/?envType=problem-list-v2&envId=2cktkvj&)
+**给定 n 个非负整数表示每个宽度为 1 的柱子的高度图，计算按此排列的柱子，下雨之后能接多少雨水。**
+
+题解：
+```python
+class Solution:
+    # 对于每个柱子，找左边的最大值和右边的最大值，较小的最大值为这个柱子的液面的高度，减去柱子本身的高度即为面积
+    def trap(self, height: List[int]) -> int:
+        n = len(height)
+        pre_max = [0]*n
+        pre_max[0] = height[0]
+        for i in range(1,n):
+            pre_max[i] = max(height[i], pre_max[i-1])
+        suf_max = [0]*n
+        suf_max[-1] = height[-1]
+        for i in range(n-2,-1,-1):
+            suf_max[i] = max(height[i], suf_max[i+1])
+        ans = 0
+        for i,h in enumerate(height):
+            ans+=min(suf_max[i], pre_max[i])-h
+        return ans
+
+    def trap(self, height: List[int]) -> int:
+        ans = pre_max = suf_max = 0
+        left, right = 0, len(height)-1
+        while left<right:
+            pre_max = max(pre_max, height[left])
+            suf_max = max(suf_max, height[right])
+            if pre_max<suf_max:
+                ans+=pre_max-height[left]
+                left+=1
+            else:
+                ans+=suf_max-height[right]
+                right-=1
+        return ans
+
+    # 用单调栈，横着计算面积
+    def trap(self, height: List[int]) -> int:
+        ans = 0
+        st = []
+        for i,h in enumerate(height):
+            while st and height[st[-1]]<=h:
+                bottom_h = height[st.pop()]
+                if not st:
+                    break
+                left = st[-1]
+                dh = min(height[left], h)-bottom_h
+                ans+=dh*(i-left-1)
+            st.append(i)
+        return ans     
+```
+
+# 动态规划
+## [LC198. 打家劫舍](https://leetcode.cn/problems/house-robber/description/?envType=problem-list-v2&envId=2cktkvj&)
+**你是一个专业的小偷，计划偷窃沿街的房屋。每间房内都藏有一定的现金，影响你偷窃的唯一制约因素就是相邻的房屋装有相互连通的防盗系统，如果两间相邻的房屋在同一晚上被小偷闯入，系统会自动报警。**
+**给定一个整数数组 nums ，表示一个环形街道上沿街的房屋，每个房屋内都藏有一定的现金。你不能同时偷窃相邻的两间房屋，否则会触发报警。**
+
+题解：
+```python
+class Solution:
+    # 递推
+    def rob(self, nums: List[int]) -> int:
+        n = len(nums)
+        if n==1: return nums[0]
+        f = [0]*n
+        f[0] = nums[0]
+        f[1] = max(nums[1], nums[0])
+        for i in range(2, n):
+            f[i] = max(nums[i]+f[i-2], f[i-1])
+        return f[-1]
+
+    # 记忆化递归
+    def rob(self, nums: List[int]) -> int:
+        n = len(nums)
+        if n==1: return nums[0]
+        @cache
+        def dfs(i):
+            if i==0: return nums[0]
+            if i==1: return max(nums[0], nums[1])
+            return max(nums[i]+dfs(i-2), dfs(i-1))
+        return dfs(n-1)
+```
+
+## [LC72. 编辑距离](https://leetcode.cn/problems/edit-distance/description/?envType=problem-list-v2&envId=2cktkvj&)
+**给你两个单词 word1 和 word2， 请返回将 word1 转换成 word2 所使用的最少操作数 。**
+**你可以对一个单词进行如下三种操作：**
+**插入一个字符**
+**删除一个字符**
+**替换一个字符**
+
+题解：
+```python
+class Solution:
+    # 递推
+    def minDistance(self, word1: str, word2: str) -> int:
+        m,n = len(word1), len(word2)
+        f = [[0]*(n+1) for _ in range(m+1)]
+        for i in range(m+1):
+            f[i][0] = i
+        for j in range(n+1):
+            f[0][j] = j
+        for i in range(m):
+            for j in range(n):
+                if word1[i]==word2[j]:
+                    f[i+1][j+1] = f[i][j]
+                else:
+                    f[i+1][j+1] = min(f[i][j], f[i][j+1], f[i+1][j])+1
+        return f[-1][-1]
+    
+    # 记忆化递归
+    def minDistance(self, word1: str, word2: str) -> int:
+        m,n = len(word1), len(word2)
+        @cache
+        def dfs(i,j):
+            if i==0: return j
+            if j==0: return i
+            if word1[i-1]==word2[j-1]:
+                return dfs(i-1, j-1)
+            else:
+                return min(dfs(i-1,j-1), dfs(i,j-1), dfs(i-1,j))+1
+        return dfs(m,n)
+```
 
 
 
