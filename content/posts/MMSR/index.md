@@ -1,7 +1,7 @@
 ---
 date: '2025-10-20T10:34:23+08:00'
 draft: true
-title: 'MMSR'
+title: '论文分享-MMSR'
 ---
 
 ## Title: The Power of Context: How Multimodality Improves Image Super-Resolution

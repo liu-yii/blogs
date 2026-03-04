@@ -1,7 +1,7 @@
 ---
 date : 2025-06-16T18:40:37+08:00
 draft : false
-title : 'LoraIR'
+title : '论文分享-LoraIR'
 ---
 Daily Paper 002
 第二天！！🥳

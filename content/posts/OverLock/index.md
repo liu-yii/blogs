@@ -1,7 +1,7 @@
 ---
 date: 2025-06-16T19:38:46+08:00
 draft: False
-title: 'OverLock'
+title: '论文分享-OverLock'
 ---
 
 ## Title: OverLoCK: An Overview-first-Look-Closely-next ConvNet  with Context-Mixing Dynamic Kernels
