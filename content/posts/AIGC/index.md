@@ -114,11 +114,27 @@ $$
 
 Negative prompt对应无条件扩散模型的文本输入，在训练时设置为空字符串，在推理时设置为我们不想要生成的内容，改善图像生成效果。
 
-1. 简述Diffusion Model和VAE之间的区别和联系：
+7. 简述Diffusion Model和VAE之间的区别和联系：
     - **联系**：DDPM可以看作是一个特殊的变分自编码器（VAE），其前向扩散过程相当于固定的编码器，逆向去噪过程相当于解码器。两者都通过最大化证据下界（ELBO）来优化模型。
     - **区别**：VAE通常是单步编码和解码，而Diffusion Model采用多步迭代的方式；VAE的编码器是可学习的，而DDPM的前向过程是固定的马尔可夫链；Diffusion Model通常能生成更高质量的图像，但采样速度较慢。
-2. 简述Diffusion Model和GANs之间的区别和联系：
-    - **联系**：两者都是生成模型，目标都是学习数据分布并生成高质量样本。都可以用于图像生成、图像编辑等任务。
+8. 简述Diffusion Model和GANs之间的区别和联系：
+   - **联系**：两者都是生成模型，目标都是学习数据分布并生成高质量样本。都可以用于图像生成、图像编辑等任务。
     - **区别**：GANs通过对抗训练（生成器与判别器博弈）学习，而Diffusion Model通过逐步去噪过程学习；GANs采样速度快但训练不稳定，容易出现模式崩塌，而Diffusion Model训练稳定但采样速度较慢；Diffusion Model通常能生成更多样化和高质量的图像，而GANs在某些任务上可能更快但质量不够稳定。
-3. DDIM加速采样：
-4.
+9. Diffusion Model的Loss：
+Diffusion model是从低频逐步学习到高频的，在模型训练前期更多是学习数据集中低频分布，此时Loss差异体现较大；但是在模型训练后期更多是学习数据集中的高频分布，此时Loss差异较小，但是在人眼感知层面差异较大。
+
+10. DiT模型中添加控制条件的方式有哪些？各有什么优缺点？
+    - **In-context conditioning**: 将两个Embeddings看成两个tokens合并在输入的tokens中，类似于ViT的Cls token，实现简单，基本上不引入额外的计算量。
+    - **Cross-attention block**: 将两个Embeddings拼接成一个序列，然后在transformer block中插入cross-attention block，条件embeddings作为cross attention的key和value。缺点是需要引入额外的计算
+    - **AdaLN**: 将time embedding和text embedding相加，回归得到LayerNorm中scale和shift两个参数。
+    - **AdaLN-Zero**: 采用zero初始化的adaLN，将adaLN的Linear层参数初始化为zero，这样网络初始化时transformer block的残差模块就是一个identity函数。另外，除了在LN之后回归scale和shift，还在每个残差模块之前回归一个scale。DiT原论文的实验结果表示AdaLN-Zero的效果是最好的。
+
+11. 在Image2Image或Image2Video任务中，如何尽可能保持住输入Image的特征？
+    - 条件扩散模型：在LDMs中添加Image condition，一般用CLIP提取图像特征，但是CLIP特征对于图像的细节保持很差，常规的优化方法是用DINO替代
+    - 垫图法：将输入的高斯噪声$x_T$替换为高斯噪声+条件图像，好处是能够保持条件的低频特征，坏处是会很大程度破坏多样性，并且可控性不足
+    - IP-Adapter：IP-Adapter在原有的Cross-attention计算上增加了image condition
+    $$
+    Z = Softmax(\frac{QK^T}{\sqrt{d}})V+Softmax(\frac{Q{({K}')}^T}{\sqrt{d}}){V}'
+    $$
+    - ControlNet：条件作为controlnet的输入，通过zero-convolution与预训练的神经网络（参数冻结）连接，对于添加controlnet的位置，Encoder和middle部分都不变，只有decoder部分加入controlnet；
+    - ReferenceNet：
