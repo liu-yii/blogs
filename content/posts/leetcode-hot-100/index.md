@@ -174,6 +174,162 @@ class Solution:
         return ans
 ```
 
+# 滑动窗口
+## [LC3. 无重复字符的最长子串](https://leetcode.cn/problems/longest-substring-without-repeating-characters/description/?envType=problem-list-v2&envId=2cktkvj&)
+**给定一个字符串 s ，请你找出其中不含有重复字符的 最长子串 的长度。**
+
+题解：
+```python
+class Solution:
+    def lengthOfLongestSubstring(self, s: str) -> int:
+        cnt = defaultdict(int)
+        ans = 0
+        left = 0
+        for i, c in enumerate(s):
+            cnt[c]+=1
+            while cnt[c]>1:
+                cnt[s[left]]-=1
+                if cnt[s[left]]==0: cnt.pop(s[left])
+                left+=1
+            ans = max(ans, i-left+1)
+        return ans  
+```
+
+## [LC438. 找到字符串中所有字母异位词](https://leetcode.cn/problems/find-all-anagrams-in-a-string/description/?envType=problem-list-v2&envId=2cktkvj&)
+**给定两个字符串 s 和 p，找到 s 中所有 p 的 异位词 的子串，返回这些子串的起始索引。不考虑答案输出的顺序。**
+
+题解：
+```python
+class Solution:
+    def findAnagrams(self, s: str, p: str) -> List[int]:
+        target = Counter(p)
+        cnt = Counter()
+        left = 0
+        ans = []
+        for i, c in enumerate(s):
+            cnt[c]+=1
+            while cnt>target:
+                cnt[s[left]]-=1
+                if cnt[s[left]]==0: cnt.pop(s[left])
+                left+=1
+            if cnt==target: ans.append(left)
+        return ans
+```
+
+## [LC76. 最小覆盖子串](https://leetcode.cn/problems/minimum-window-substring/description/?envType=problem-list-v2&envId=2cktkvj&)
+**给你一个字符串 s 、一个字符串 t 。返回 s 中涵盖 t 所有字符的最小子串。如果 s 中不存在涵盖 t 所有字符的子串，则返回空字符串 "" 。**
+
+题解：滑动窗口，在循环内更新
+```python
+class Solution:
+    def minWindow(self, s: str, t: str) -> str:
+        target = Counter(t)
+        cnt = Counter()
+        left, minlen = 0, inf
+        ans = ""
+        for i,c in enumerate(s):
+            cnt[c]+=1
+            while cnt and cnt>=target:
+                if i-left+1<minlen:
+                    ans = s[left:i+1]
+                    minlen = i-left+1
+                cnt[s[left]]-=1
+                if cnt[s[left]]==0: cnt.pop(s[left])
+                left+=1
+        return ans         
+```
+
+# 双指针
+## [LC15.三数之和](https://leetcode.cn/problems/3sum/description/?envType=problem-list-v2&envId=2cktkvj&)
+**给你一个整数数组 nums ，判断是否存在三元组 [nums[i], nums[j], nums[k]] 满足 i != j、i != k 且 j != k ，同时还满足 nums[i] + nums[j] + nums[k] == 0 。请你返回所有和为 0 且不重复的三元组。**
+
+题解：
+```python
+
+class Solution:
+    def threeSum(self, nums: list[int]) -> list[list[int]]:
+        nums.sort()
+        n = len(nums)
+        ans = []
+        for i in range(n-2):
+            x = nums[i]
+            if i>0 and x==nums[i-1]:
+                continue
+            if x+nums[i+1]+nums[i+2]>0:
+                break
+            if x+nums[-2]+nums[-1]<0:
+                continue
+            left = i+1
+            right = n-1
+            while left<right:
+                s = nums[i]+nums[left]+nums[right]
+                if s<0:
+                    left+=1
+                elif s>0:
+                    right-=1
+                else:
+                    ans.append([x, nums[left], nums[right]])
+                    left+=1
+                    while left<right and nums[left-1]==nums[left]:
+                        left+=1
+                    right-=1
+                    while left<right and nums[right+1]==nums[right]:
+                        right-=1
+        return ans
+```
+
+## [LC42. 接雨水](https://leetcode.cn/problems/trapping-rain-water/description/?envType=problem-list-v2&envId=2cktkvj&)
+**给定 n 个非负整数表示每个宽度为 1 的柱子的高度图，计算按此排列的柱子，下雨之后能接多少雨水。**
+
+题解：
+```python
+class Solution:
+    # 对于每个柱子，找左边的最大值和右边的最大值，较小的最大值为这个柱子的液面的高度，减去柱子本身的高度即为面积
+    def trap(self, height: List[int]) -> int:
+        n = len(height)
+        pre_max = [0]*n
+        pre_max[0] = height[0]
+        for i in range(1,n):
+            pre_max[i] = max(height[i], pre_max[i-1])
+        suf_max = [0]*n
+        suf_max[-1] = height[-1]
+        for i in range(n-2,-1,-1):
+            suf_max[i] = max(height[i], suf_max[i+1])
+        ans = 0
+        for i,h in enumerate(height):
+            ans+=min(suf_max[i], pre_max[i])-h
+        return ans
+
+    def trap(self, height: List[int]) -> int:
+        ans = pre_max = suf_max = 0
+        left, right = 0, len(height)-1
+        while left<right:
+            pre_max = max(pre_max, height[left])
+            suf_max = max(suf_max, height[right])
+            if pre_max<suf_max:
+                ans+=pre_max-height[left]
+                left+=1
+            else:
+                ans+=suf_max-height[right]
+                right-=1
+        return ans
+
+    # 用单调栈，横着计算面积
+    def trap(self, height: List[int]) -> int:
+        ans = 0
+        st = []
+        for i,h in enumerate(height):
+            while st and height[st[-1]]<=h:
+                bottom_h = height[st.pop()]
+                if not st:
+                    break
+                left = st[-1]
+                dh = min(height[left], h)-bottom_h
+                ans+=dh*(i-left-1)
+            st.append(i)
+        return ans     
+```
+
 # 回溯
 
 ## [LC46.全排列](https://leetcode.cn/problems/permutations/description/?envType=problem-list-v2&envId=2cktkvj&)
@@ -271,6 +427,9 @@ class Solution:
         dfs(0,0)
         return ans
 ```
+
+
+
 # 图论
 
 ## [LC207.课程表](https://leetcode.cn/problems/course-schedule/description/?envType=problem-list-v2&envId=2cktkvj&)
@@ -365,139 +524,6 @@ class Solution:
         return -1 if cnt else ans
 ```
 
-# 滑动窗口
-## [LC3. 无重复字符的最长子串](https://leetcode.cn/problems/longest-substring-without-repeating-characters/description/?envType=problem-list-v2&envId=2cktkvj&)
-**给定一个字符串 s ，请你找出其中不含有重复字符的 最长子串 的长度。**
-
-题解：
-```python
-class Solution:
-    def lengthOfLongestSubstring(self, s: str) -> int:
-        cnt = defaultdict(int)
-        ans = 0
-        left = 0
-        for i, c in enumerate(s):
-            cnt[c]+=1
-            while cnt[c]>1:
-                cnt[s[left]]-=1
-                if cnt[s[left]]==0: cnt.pop(s[left])
-                left+=1
-            ans = max(ans, i-left+1)
-        return ans  
-```
-
-## [LC438. 找到字符串中所有字母异位词](https://leetcode.cn/problems/find-all-anagrams-in-a-string/description/?envType=problem-list-v2&envId=2cktkvj&)
-**给定两个字符串 s 和 p，找到 s 中所有 p 的 异位词 的子串，返回这些子串的起始索引。不考虑答案输出的顺序。**
-
-题解：
-```python
-class Solution:
-    def findAnagrams(self, s: str, p: str) -> List[int]:
-        target = Counter(p)
-        cnt = Counter()
-        left = 0
-        ans = []
-        for i, c in enumerate(s):
-            cnt[c]+=1
-            while cnt>target:
-                cnt[s[left]]-=1
-                if cnt[s[left]]==0: cnt.pop(s[left])
-                left+=1
-            if cnt==target: ans.append(left)
-        return ans
-```
-
-# 双指针
-## [LC15.三数之和](https://leetcode.cn/problems/3sum/description/?envType=problem-list-v2&envId=2cktkvj&)
-**给你一个整数数组 nums ，判断是否存在三元组 [nums[i], nums[j], nums[k]] 满足 i != j、i != k 且 j != k ，同时还满足 nums[i] + nums[j] + nums[k] == 0 。请你返回所有和为 0 且不重复的三元组。**
-
-题解：
-```python
-
-class Solution:
-    def threeSum(self, nums: list[int]) -> list[list[int]]:
-        nums.sort()
-        n = len(nums)
-        ans = []
-        for i in range(n-2):
-            x = nums[i]
-            if i>0 and x==nums[i-1]:
-                continue
-            if x+nums[i+1]+nums[i+2]>0:
-                break
-            if x+nums[-2]+nums[-1]<0:
-                continue
-            left = i+1
-            right = n-1
-            while left<right:
-                s = nums[i]+nums[left]+nums[right]
-                if s<0:
-                    left+=1
-                elif s>0:
-                    right-=1
-                else:
-                    ans.append([x, nums[left], nums[right]])
-                    left+=1
-                    while left<right and nums[left-1]==nums[left]:
-                        left+=1
-                    right-=1
-                    while left<right and nums[right+1]==nums[right]:
-                        right-=1
-        return ans
-```
-
-## [LC42. 接雨水](https://leetcode.cn/problems/trapping-rain-water/description/?envType=problem-list-v2&envId=2cktkvj&)
-**给定 n 个非负整数表示每个宽度为 1 的柱子的高度图，计算按此排列的柱子，下雨之后能接多少雨水。**
-
-题解：
-```python
-class Solution:
-    # 对于每个柱子，找左边的最大值和右边的最大值，较小的最大值为这个柱子的液面的高度，减去柱子本身的高度即为面积
-    def trap(self, height: List[int]) -> int:
-        n = len(height)
-        pre_max = [0]*n
-        pre_max[0] = height[0]
-        for i in range(1,n):
-            pre_max[i] = max(height[i], pre_max[i-1])
-        suf_max = [0]*n
-        suf_max[-1] = height[-1]
-        for i in range(n-2,-1,-1):
-            suf_max[i] = max(height[i], suf_max[i+1])
-        ans = 0
-        for i,h in enumerate(height):
-            ans+=min(suf_max[i], pre_max[i])-h
-        return ans
-
-    def trap(self, height: List[int]) -> int:
-        ans = pre_max = suf_max = 0
-        left, right = 0, len(height)-1
-        while left<right:
-            pre_max = max(pre_max, height[left])
-            suf_max = max(suf_max, height[right])
-            if pre_max<suf_max:
-                ans+=pre_max-height[left]
-                left+=1
-            else:
-                ans+=suf_max-height[right]
-                right-=1
-        return ans
-
-    # 用单调栈，横着计算面积
-    def trap(self, height: List[int]) -> int:
-        ans = 0
-        st = []
-        for i,h in enumerate(height):
-            while st and height[st[-1]]<=h:
-                bottom_h = height[st.pop()]
-                if not st:
-                    break
-                left = st[-1]
-                dh = min(height[left], h)-bottom_h
-                ans+=dh*(i-left-1)
-            st.append(i)
-        return ans     
-```
-
 # 动态规划
 ## [LC198. 打家劫舍](https://leetcode.cn/problems/house-robber/description/?envType=problem-list-v2&envId=2cktkvj&)
 **你是一个专业的小偷，计划偷窃沿街的房屋。每间房内都藏有一定的现金，影响你偷窃的唯一制约因素就是相邻的房屋装有相互连通的防盗系统，如果两间相邻的房屋在同一晚上被小偷闯入，系统会自动报警。**
@@ -569,6 +595,85 @@ class Solution:
         return dfs(m,n)
 ```
 
+## [LC322. 零钱兑换](https://leetcode.cn/problems/coin-change/description/?envType=problem-list-v2&envId=2cktkvj&)
+**给你一个整数数组 coins ，表示不同面额的硬币；以及一个整数 amount ，表示总金额。**
+**计算并返回可以凑成总金额所需的 最少的硬币个数 。如果没有任何一种硬币组合能组成总金额，返回 -1 。**
+**你可以认为每种硬币的数量是无限的。**
+
+题解：
+```python
+class Solution:
+    # 记忆化递归：选或不选
+    def coinChange(self, coins: List[int], amount: int) -> int:
+        n = len(coins)
+        @cache
+        def dfs(i, target):
+            if i<0:
+                if target==0: return 0
+                else:
+                    return inf 
+            if target<coins[i]:
+                return dfs(i-1, target)
+            return min(dfs(i, target-coins[i])+1, dfs(i-1, target))
+        ans = dfs(n-1, amount)
+        return ans if ans < inf else -1
+
+    # 递推
+    def coinChange(self, coins: List[int], amount: int) -> int:
+        n = len(coins)
+        f = [[inf]*(amount+1) for _ in range(n+1)]
+        f[0][0] = 0
+        for i in range(n):
+            for j in range(amount+1):
+                if j<coins[i]:
+                    f[i+1][j] = f[i][j]
+                else:
+                    f[i+1][j] = min(f[i][j], f[i+1][j-coins[i]]+1)
+        ans = f[-1][-1]
+        return ans if ans<inf else -1
+```
+
+## [LC494. 目标和](https://leetcode.cn/problems/target-sum/description/?envType=problem-list-v2&envId=2cktkvj&)
+**给你一个非负整数数组 nums 和一个整数 target 。**
+**你可以向数组中的每个整数添加 '+' 或 '-' ，并串联起所有整数，来构造一个表达式**
+**返回可以达到目标和的不同表达式的数目。**
+
+题解：
+```python
+class Solution:
+    def findTargetSumWays(self, nums: List[int], target: int) -> int:
+        s = sum(nums)-abs(target)
+        if s<0 or s%2:
+            return 0
+        @cache
+        def dfs(i, left):
+            if i<0:
+                return 1 if left==0 else 0
+            if left<nums[i]:
+                return dfs(i-1, left)
+            return dfs(i-1, left)+dfs(i-1, left-nums[i])
+        return dfs(len(nums)-1, s//2)
+```
+
+
+# 单调栈
+## [LC739. 每日温度](https://leetcode.cn/problems/daily-temperatures/description/?envType=problem-list-v2&envId=2cktkvj&)
+**给定一个整数数组 temperatures ，表示每天的温度，返回一个数组 answer ，其中 answer[i] 是指在第 i 天之后，才会有更高的温度。如果气温在这之后都不会升高，请在该位置用 0 来代替。**
+
+题解：
+```python
+class Solution:
+    def dailyTemperatures(self, temperatures: List[int]) -> List[int]:
+        n = len(temperatures)
+        ans = [0]*n
+        st = []
+        for i, t in enumerate(temperatures):
+            while st and temperatures[st[-1]]<t:
+                j = st.pop()
+                ans[j] = i-j
+            st.append(i)
+        return ans
+```
 
 
 

@@ -314,9 +314,199 @@ q(x_{t-1}|x_t) \approx \mathcal{N}\left({x}\_{t-1};\frac{x_t-\bar\beta_t}{\alpha
 \end{align}
 $$
 
-### SDE
-updating.....
+### 随机微分方程（SDE）视角
 
-## Conditioned Generation
-### Classifier Guided Diffusion 
-updating.....
+从连续时间的角度来看，扩散模型可以被理解为随机微分方程（SDE）。这个视角由Score-based Generative Models提出，将离散的扩散过程推广到连续时间域。
+
+**前向SDE**
+
+当时间步趋于无穷小时，前向扩散过程可以表示为一个随机微分方程：
+
+$$
+dx=f(x,t)dt+g(t)dw
+$$
+
+其中：
+
+- $f(x,t)$是漂移系数（drift coefficient）
+- $g(t)$是扩散系数（diffusion coefficient）
+- $w$是标准布朗运动
+
+对于DDPM，对应的SDE形式为：
+
+$$
+dx=-\frac{1}{2}\beta(t)x dt+\sqrt{\beta(t)}dw
+$$
+
+其中$\beta(t)$是噪声调度函数。这个SDE描述了数据如何随时间逐渐变为纯噪声。
+
+**逆向SDE**
+
+Anderson (1982)证明了任何扩散过程都存在一个对应的逆向SDE，其形式为：
+
+$$
+dx=[f(x,t)-g(t)^2\nabla_x\log p_t(x)]dt+g(t)d\bar{w}
+$$
+
+其中$\nabla_x\log p_t(x)$被称为得分函数（score function），$\bar{w}$是逆向时间的布朗运动。关键洞察是：如果我们知道每个时刻的得分函数，就可以从噪声逆向采样回数据。
+
+**得分匹配**
+
+扩散模型训练的本质是学习得分函数$\nabla_x\log p_t(x)$。通过Tweedie公式，我们可以证明：
+
+$$
+\nabla_x\log p_t(x_t)=-\frac{1}{\sqrt{1-\bar{\alpha}_t}}\mathbb{E}[\epsilon|x_t]
+$$
+
+因此，训练网络预测噪声$\epsilon$等价于训练得分函数。训练目标可以写成：
+
+$$
+\mathcal{L}\_{score}=\mathbb{E}\_{t,x_0,\epsilon}\left[\lambda(t)\|\nabla_x\log p_t(x_t)-s_\theta(x_t,t)\|^2\right]
+$$
+
+其中$s_\theta(x_t,t)$是神经网络预测的得分函数，$\lambda(t)$是权重函数。
+
+**概率流ODE**
+
+SDE视角的一个重要发现是，逆向SDE对应一个概率流ODE（Probability Flow ODE）：
+
+$$
+dx=\left[f(x,t)-\frac{1}{2}g(t)^2\nabla_x\log p_t(x)\right]dt
+$$
+
+这个ODE与SDE具有相同的边缘分布$p_t(x)$，但是确定性的。这解释了为什么DDIM的确定性采样是可行的，也为设计更高效的ODE求解器提供了理论基础。
+
+**SDE视角的优势**
+
+SDE框架带来了几个重要优势：
+
+- **统一的理论框架：** 可以在同一框架下理解DDPM、DDIM等不同变体
+- **灵活的采样器：** 可以使用各种SDE/ODE数值求解器，不局限于特定的离散化方案
+- **可控生成：** 通过在SDE中加入条件项，可以实现条件生成和可控编辑
+- **理论分析：** 连续时间框架使得理论分析（如收敛性、样本复杂度）更加容易
+
+**常见的SDE变体**
+
+基于SDE框架，研究者提出了多种扩散过程的设计：
+
+- **Variance Preserving (VP) SDE：** 对应DDPM，保持数据方差
+- **Variance Exploding (VE) SDE：** 对应于NCSN，添加噪声不做缩放，方差会爆炸
+- **Sub-VP SDE：** 介于VP和VE之间的折中方案
+
+这些不同的SDE设计在不同的应用场景中各有优势，为扩散模型的发展提供了丰富的工具箱。
+
+### UNet架构
+
+UNet最初是为图像分割任务设计的编码器-解码器架构,在扩散模型中被广泛采用作为去噪网络的主干。
+
+架构特点
+
+- **编码器-解码器结构:** 编码器逐步下采样提取特征,解码器逐步上采样恢复分辨率
+- **跳跃连接:** 在相同分辨率的编码器和解码器层之间建立直接连接,帮助保留细节信息
+- **时间嵌入:** 通过正弦位置编码将时间步$t$嵌入到网络中,指导去噪过程
+- **注意力机制:** 在较低分辨率层引入自注意力层,捕捉长程依赖关系
+
+在扩散模型中的应用
+
+UNet在DDPM、Stable Diffusion等模型中作为核心组件,输入是噪声图像$x_t$和时间步$t$,输出是预测的噪声$\epsilon_\theta(x_t,t)$。网络通过残差块、归一化层和注意力层的组合,学习从噪声中恢复数据的过程。
+
+优势与局限
+
+- **优势:** 归纳偏置适合图像数据,跳跃连接有效传递信息,在像素空间效果优异
+- **局限:** 计算复杂度随分辨率平方增长,难以直接扩展到高分辨率图像,缺乏transformer的灵活性
+
+### DiT(Diffusion Transformer)
+
+DiT用纯Transformer架构替代UNet,将图像视为patch序列进行处理,代表了扩散模型架构设计的新方向。
+
+核心设计
+
+- **Patchify:** 将图像分割成固定大小的patch(如16×16),每个patch通过线性投影得到token
+- **Transformer块:** 使用标准的多头自注意力和前馈网络,处理patch序列
+- **条件注入:** 时间步$t$和类别标签通过adaptive layer norm (adaLN)注入到每个transformer块中
+- **输出层:** 最后将token序列重组回图像空间,预测噪声或速度场
+
+adaLN调节机制
+
+DiT的关键创新是adaLN,它根据时间步和条件调节transformer的归一化参数:
+
+$$
+\text{adaLN}(h,c)=\gamma(c)\cdot\frac{h-\mu(h)}{\sigma(h)}+\beta(c)
+$$
+
+其中$c$是条件嵌入,$\gamma(c)$和$\beta(c)$是由条件预测的缩放和偏移参数。这种设计使得条件信息能够有效地调节整个网络的行为。
+
+扩展性优势
+
+DiT展现了优异的扩展性:
+
+- **模型大小:** 可以轻松扩展到数十亿参数,遵循transformer的扩展规律
+- **性能提升:** 更大的模型和更多的计算带来持续的性能改进
+- **灵活性:** 统一的架构便于迁移学习和多模态扩展
+
+与UNet的对比
+
+- **归纳偏置:** UNet内置空间归纳偏置,DiT更依赖数据学习
+- **计算效率:** 小规模时UNet更高效,大规模时DiT扩展性更好
+- **应用场景:** UNet适合像素空间,DiT在latent空间和高分辨率生成中表现优异
+
+## 条件生成
+
+条件生成是扩散模型的重要应用方向，通过在生成过程中引入额外的条件信息（如文本、类别标签、图像等），可以实现可控的内容生成。
+
+**采样引导**
+
+**分类器引导（Classifier Guidance）**
+
+分类器引导通过在采样过程中使用一个预训练的分类器来引导生成过程。具体来说，在每个去噪步骤中，除了使用扩散模型预测的噪声外，还加入分类器梯度的引导：
+
+$$
+\tilde{\epsilon}\_{\theta}(x_t,t,y)=\epsilon_\theta(x_t,t)+s\cdot\nabla_{x_t}\log p_\phi(y|x_t)
+$$
+
+其中$y$是条件标签，$s$是引导强度，$p_\phi(y|x_t)$是分类器。更大的$s$会产生更符合条件的样本，但可能损失多样性。
+
+**无分类器引导（Classifier-Free Guidance）**
+
+无分类器引导通过在训练时同时学习条件和无条件模型来避免使用额外的分类器。在训练过程中，以一定概率$p$丢弃条件信息，在采样时通过以下方式组合两者的预测：
+
+$$
+\tilde{\epsilon}\_{\theta}(x_t,t,y)=\epsilon_\theta(x_t,t,\emptyset)+w\cdot(\epsilon_\theta(x_t,t,y)-\epsilon_\theta(x_t,t,\emptyset))
+$$
+
+其中$w$是引导权重，$\emptyset$表示无条件。当$w=0$时退化为无条件生成，$w>1$时会增强条件的影响。
+
+**模型架构层面的信息注入**
+
+![DiT](img/DiT.png)
+
+**Cross-Attention**
+
+对于文本到图像生成等任务，常用的方法是将文本编码器（如CLIP text encoder）的输出通过交叉注意力机制注入到UNet或DiT中。具体来说，图像特征作为查询(Q)，文本特征作为键(K)和值(V)，通过注意力机制实现条件信息的融合。
+
+**AdaLN-Zero**
+
+DiT中的AdaLN-Zero是一种改进的条件注入机制，通过将adaLN的缩放参数$\gamma$初始化为零，使得模型在训练初期表现为恒等映射。这种设计提高了训练稳定性，使得大规模DiT模型更容易收敛，并且能够更有效地学习条件信息的影响。
+
+**In-Context condition**
+
+In-Context条件生成是一种新兴的条件注入方式，通过在输入序列中提供示例来隐式地传达生成意图。与显式的文本提示或类别标签不同，这种方法允许模型从上下文中学习任务和风格。例如，在图像生成中，可以将参考图像作为prefix tokens添加到输入序列中，模型通过注意力机制理解参考图像的风格和内容，从而生成风格一致的新图像。
+
+**ControlNet**
+
+ControlNet是一种为预训练扩散模型添加空间条件控制的方法，通过冻结原始模型并添加可训练的副本来实现。它将边缘图、深度图、姿态等结构信息转换为像素级的控制信号，注入到UNet的各个层中。锁定原始 UNet 权重，复制一份 Encoder 的权重作为ControlNet 分支。将条件 y 输入ControlNet，通过零卷积层（Zero Convolution）逐渐将特征加回到原始 UNet 的 Decoder 中。
+
+![Controlnet](img/controlnet.png)
+
+## 扩散模型加速与蒸馏
+
+Training-free（改进采样算法，减少采样步数）:
+
+- **DDIM：** 通过非马尔可夫过程实现确定性采样，可以用更少的步数（如50步）达到相近的质量
+- **DPM-Solver：** 基于概率流ODE设计的高阶求解器，在10-20步内就能生成高质量样本
+- **EDM：** 通过优化噪声调度和采样策略，进一步提升采样效率
+
+Training:
+
+- **Progressive Distillation：** 逐步将N步采样蒸馏到N/2步，递归进行直到达到期望的步数（如4步或1步）
+- **Consistency Models：** 训练模型直接将任意时刻的噪声样本映射到数据，实现单步生成
