@@ -1,7 +1,7 @@
 ---
 date: 2025-06-16T14:45:29+08:00
 draft: false
-title: '生成模型漫谈'
+title: '生成模型基础'
 ---
 
 ## Preliminary Knowledge

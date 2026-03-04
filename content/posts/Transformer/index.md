@@ -1,7 +1,7 @@
 ---
 date: '2025-12-19T18:36:19+08:00'
 draft: false
-title: 'Transformer基础'
+title: 'Transformer基础-位置编码'
 ---
 
 ## 位置编码

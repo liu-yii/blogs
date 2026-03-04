@@ -1,7 +1,7 @@
 ---
 date: 2025-06-16T15:18:14+08:00
 draft: false
-title: 'X Restormer'
+title: '论文分享-XRestormer'
 ---
 
 Daily Paper 001

@@ -1,7 +1,7 @@
 ---
 date: '2025-11-14T13:55:39+08:00'
 draft: false
-title: 'Leetcode Hot 100'
+title: '刷题记录-Leetcode Hot 100'
 ---
 
 # 链表

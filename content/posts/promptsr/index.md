@@ -1,7 +1,7 @@
 ---
 date: 2025-06-16T18:52:43+08:00
-draft: true
-title: 'Promptsr'
+draft: True
+title: '论文分享-Promptsr'
 ---
 Daily Paper 003
 第三天！！🥳 
