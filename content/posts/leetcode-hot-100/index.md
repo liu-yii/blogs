@@ -216,6 +216,51 @@ class Solution:
         return ans
 ```
 
+## [LC560. 和为 K 的子数组](https://leetcode.cn/problems/subarray-sum-equals-k/description/?envType=problem-list-v2&envId=2cktkvj&)
+**给你一个整数数组 nums 和一个整数 k ，请你统计并返回 该数组中和为 k 的子数组的个数 。**
+
+题解：哈希表+前缀和，**两数之和的变体**
+```python
+class Solution:
+    def subarraySum(self, nums: List[int], k:int) -> int:
+        n = len(nums)
+        presum  = [0]*(n+1)
+        for i in range(n):
+            presum[i+1] = presum[i]+nums[i]
+        left, ans = 0, 0
+        cnt = defaultdict(int)
+        for i, x in enumerate(presum):
+            if x-k in cnt:
+                ans+=cnt[x-k]
+            cnt[x]+=1
+        return ans
+```
+
+## [LC239. 滑动窗口最大值](https://leetcode.cn/problems/sliding-window-maximum/description/?envType=problem-list-v2&envId=2cktkvj&)
+**给你一个整数数组 nums，有一个大小为 k 的滑动窗口从数组的最左侧移动到数组的最右侧。你只可以看到在滑动窗口内的 k 个数字。滑动窗口每次只向右移动一位。返回 滑动窗口中的最大值 。**
+
+题解：使用单调队列存储窗口内的值
+```python
+class Solution:
+    def maxSlidingWindow(self, nums: List[int], k: int) -> List[int]:
+        n = len(nums)
+        ans = [0]*(n-k+1)
+        st = deque()
+        for i, num in enumerate(nums):
+            while st and nums[st[-1]]<=num:
+                st.pop()
+            st.append(i)
+            left = i-k+1
+            if left > st[0]:
+                st.popleft()
+            if left>=0:
+                ans[left] = nums[st[0]]
+        return ans
+```
+
+
+
+
 ## [LC76. 最小覆盖子串](https://leetcode.cn/problems/minimum-window-substring/description/?envType=problem-list-v2&envId=2cktkvj&)
 **给你一个字符串 s 、一个字符串 t 。返回 s 中涵盖 t 所有字符的最小子串。如果 s 中不存在涵盖 t 所有字符的子串，则返回空字符串 "" 。**
 
@@ -655,6 +700,49 @@ class Solution:
         return dfs(len(nums)-1, s//2)
 ```
 
+# 栈
+## [LC394. 字符串解码](https://leetcode.cn/problems/decode-string/description/?envType=problem-list-v2&envId=2cktkvj&)
+**给你一个字符串 s ，根据下述规则反转字符串：**
+**所有非英文字母保留在原有位置。**
+**所有英文字母（小写或大写）位置反转。**
+**返回反转后的 s 。**
+
+题解：
+```python
+class Solution:
+    def decodeString(self, s: str) -> str:
+        if not s: return s
+        if s[0].isalpha():
+            return s[0] + self.decodeString(s[1:])
+        i = s.find("[")
+        balance = 1
+        for j in count(i+1):
+            if s[j] == '[':
+                balance+=1
+            elif s[j] == ']':
+                balance-=1
+                if balance==0:
+                    return self.decodeString(s[i+1:j])*int(s[:i]) + self.decodeString(s[j+1:])
+    
+    # 用栈模拟
+    def decodeString(self, s: str) -> str:
+        st = []
+        k = 0
+        res = ''
+        for i, c in enumerate(s):
+            if c.isalpha():
+                res += c
+            elif c.isdigit():
+                k = k*10+int(c)
+            elif c=='[':
+                st.append((res, k))
+                res = ''
+                k = 0
+            else:
+                pre_res, pre_k = st.pop()
+                res = pre_res+ pre_k*res
+        return res
+```
 
 # 单调栈
 ## [LC739. 每日温度](https://leetcode.cn/problems/daily-temperatures/description/?envType=problem-list-v2&envId=2cktkvj&)
@@ -675,8 +763,120 @@ class Solution:
         return ans
 ```
 
+## [LC84. 柱状图中最大的矩形](https://leetcode.cn/problems/largest-rectangle-in-histogram/description/?envType=problem-list-v2&envId=2cktkvj&)
+**给定 n 个非负整数，用来表示柱状图中各个柱子的高度。每个柱子彼此相邻，且宽度为 1 。**
+**求在该柱状图中，能够勾勒出来的矩形的最大面积。**
 
+题解：和[LC42. 接雨水](https://leetcode.cn/problems/trapping-rain-water/description/?envType=problem-list-v2&envId=2cktkvj&)的单调栈做法类似。
+```python
+class Solution:
+    def largestRectangleArea(self, heights: List[int]) -> int:
+        st = []
+        ans = 0
+        heights = [-1]+heights+[-1]
+        for i,h in enumerate(heights):
+            while st and heights[st[-1]]>=h:
+                j = st.pop()
+                start = st[-1] if st else -1
+                ans = max(ans, heights[j]*(i-start-1))
+            st.append(i)
+            
+        return ans
+```
 
+# 二分查找
+## [LC35.搜索插入位置](https://leetcode.cn/problems/search-insert-position/description/?envType=problem-list-v2&envId=2cktkvj&)
+**给定一个排序数组和一个目标值，在数组中找到目标值，并返回其索引。如果目标值不存在于数组中，返回它将会被按顺序插入的位置。**
+**请必须使用时间复杂度为 O(log n) 的算法。** 
+
+题解：二分查找，开区间
+```python
+class Solution
+    def searchInsert(self, nums: List[int], target: int) -> int:
+        left, right = -1, len(nums)
+        while left+1<right:
+            mid = (left+right)//2
+            if nums[mid]>=target:
+                right = mid
+            else:
+                left = mid
+        return right
+```
+
+## [LC74. 搜索二维矩阵](https://leetcode.cn/problems/search-a-2d-matrix/description/?envType=problem-list-v2&envId=2cktkvj&)
+**给你一个满足下述两条属性的 m x n 整数矩阵：**
+**每行中的整数从左到右按非严格递增顺序排列。**
+**每行的第一个整数大于前一行的最后一个整数。**
+**给你一个整数 target ，如果 target 在矩阵中，返回 true ；否则，返回 false 。**
+
+题解：
+```python
+class Solution:
+    # 直接二分
+    def searchMatrix(self, matrix: List[List[int]], target: int) -> bool:
+        m,n = len(matrix), len(matrix[0])
+        left, right = -1, m*n
+        while left+1<right:
+            mid = (left+right)//2
+            x = mid//n
+            y = mid%n
+            if matrix[x][y]==target: return True
+            if matrix[x][y]<target:
+                left = mid
+            else:
+                right = mid
+        return False
+    
+    # 利用矩阵的性质
+    def searchMatrix(self, matrix: List[List[int]], target: int) -> bool:
+        m,n = len(matrix), len(matrix[0])
+        i,j = 0, n-1
+        while i<m and j>=0:
+            if matrix[i][j]==target:
+                return True
+            if matrix[i][j]<target:
+                i+=1
+            else:
+                j-=1
+        return False
+```
+
+## [LC33. 搜索旋转排序数组](https://leetcode.cn/problems/search-in-rotated-sorted-array/description/?envType=problem-list-v2&envId=2cktkvj&)
+**整数数组 nums 按升序排列，数组中的值 互不相同 。**
+**在传递给函数之前，nums 在预先未知的某个下标 k（0 <= k < nums.length）上进行了 旋转，使数组变为 [nums[k], nums[k+1], ..., nums[n-1], nums[0], nums[1], ..., nums[k-1]]（下标 从 0 开始 计数）。**
+**给你 旋转后 的数组 nums 和一个整数 target ，如果 nums 中存在这个目标值 target ，则返回它的下标，否则返回 -1 。**
+**你必须设计一个时间复杂度为 O(log n) 的算法解决此问题。**
+
+题解：
+```python
+class Solution:
+    def findMin(self, nums):
+        left, right = -1, len(nums)-1
+        while left+1<right:
+            mid = (left+right)//2
+            if nums[mid]<nums[-1]:
+                right = mid
+            else:
+                left = mid
+        return right
+
+    def lowerbound(self, nums, left, right, target):
+        while left+1<right:
+            mid = (left+right)//2
+            if nums[mid]>=target:
+                right = mid
+            else:
+                left = mid
+        return right if nums[right]==target else -1
+
+    def search(self, nums: List[int], target: int) -> int:
+        idx = self.findMin(nums)
+        if target<=nums[-1]:
+            return self.lowerbound(nums, idx-1, len(nums), target)
+        else:
+            return self.lowerbound(nums, -1, idx, target)          
+
+```
 
         
             
