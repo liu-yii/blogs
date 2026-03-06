@@ -700,6 +700,56 @@ class Solution:
         return dfs(len(nums)-1, s//2)
 ```
 
+## [LC300. 最长递增子序列](https://leetcode.cn/problems/longest-increasing-subsequence/description/?envType=problem-list-v2&envId=2cktkvj&)
+**给你一个整数数组 nums ，找到其中最长严格递增子序列的长度。**
+**子序列 是由数组派生而来的序列，删除（或不删除）数组中的元素而不改变其余元素的顺序。例如，[3,6,2,7] 是数组 [0,3,1,6,2,2,7] 的子序列。**
+
+题解：
+```python
+class Solution:
+    def lengthOfLIS(self, nums: List[int]) -> int:
+        n = len(nums)
+        @cache
+        def dfs(i):
+            if i==0: return 1
+            max_len = 1
+            for j in range(0, i):
+                if nums[j]<nums[i]:
+                    max_len = max(max_len, dfs(j)+1)
+            return max_len
+                    
+        return max(dfs(i) for i in range(n))
+
+    # 贪心+二分
+    def lengthOfLIS(self, nums: List[int]) -> int:
+        g = []
+        for x in nums:
+            j = bisect_left(g, x)
+            if j == len(g):
+                g.append(x)
+            else:
+                g[j] = x
+        return len(g)
+```
+
+## [LC152. 乘积最大子数组](https://leetcode.cn/problems/maximum-product-subarray/description/?envType=problem-list-v2&envId=2cktkvj&)
+**给你一个整数数组 nums ，请你找出数组中乘积最大的非空连续子数组（该子数组中至少包含一个数字），并返回该子数组所对应的乘积。**
+**测试用例的答案是一个 32-位 整数。**
+**子数组 是数组的连续子序列。**
+
+题解：
+```python
+class Solution:
+    def maxProduct(self, nums: List[int]) -> int:
+        max_res = min_res = 1
+        ans = -inf
+        for x in nums:
+            max_res, min_res = max(max_res*x, min_res*x, x), min(max_res*x, min_res*x, x)
+            ans = max(ans, max_res)
+        return ans
+            
+```
+
 # 栈
 ## [LC394. 字符串解码](https://leetcode.cn/problems/decode-string/description/?envType=problem-list-v2&envId=2cktkvj&)
 **给你一个字符串 s ，根据下述规则反转字符串：**
