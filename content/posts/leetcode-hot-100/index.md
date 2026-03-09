@@ -174,6 +174,30 @@ class Solution:
         return ans
 ```
 
+# 矩阵
+## [LC54. 螺旋矩阵](https://leetcode.cn/problems/spiral-matrix/description/?envType=problem-list-v2&envId=2cktkvj&)
+**给你一个 m 行 n 列的矩阵 matrix ，请按照 顺时针螺旋顺序 ，返回矩阵中的所有元素。**
+
+题解：模拟，标记
+```python
+class Solution:
+    def spiralOrder(self, matrix: List[List[int]]) -> List[int]:
+        m, n = len(matrix), len(matrix[0])
+        directions = [(0,1),(1,0),(0,-1),(-1,0)]
+        x = y = idx = 0
+        ans = []
+        vis = [[False]*n for _ in range(m)]
+        for _ in range(m*n):
+            ans.append(matrix[x][y])
+            vis[x][y] = True
+            i,j = x+directions[idx%4][0], y+directions[idx%4][1]
+            if i<0 or i>=m or j<0 or j>=n or vis[i][j]:
+                idx+=1
+            x,y = x+directions[idx%4][0], y+directions[idx%4][1]
+        return ans
+```
+
+
 # 滑动窗口
 ## [LC3. 无重复字符的最长子串](https://leetcode.cn/problems/longest-substring-without-repeating-characters/description/?envType=problem-list-v2&envId=2cktkvj&)
 **给定一个字符串 s ，请你找出其中不含有重复字符的 最长子串 的长度。**
