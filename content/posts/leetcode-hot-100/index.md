@@ -110,6 +110,31 @@ class Solution:
         return dfs(root, p, q)
 ```
 
+## [LC543.二叉树的直径](https://leetcode.cn/problems/diameter-of-binary-tree/description/?envType=problem-list-v2&envId=2cktkvj&)
+**给定一棵二叉树，你需要计算它的直径长度。一棵二叉树的直径长度是任意两个结点路径长度中的最大值。这条路径可能穿过也可能不穿过根结点。**
+题解：对于每个节点，计算左右子树的深度，更新答案为左右子树深度之和
+```python
+class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
+
+class Solution:
+    def diameterOfBinaryTree(self, root: Optional[TreeNode]) -> int:
+        ans = 0
+        def dfs(node):
+            if node is None:
+                return -1
+            left = dfs(node.left)+1
+            right = dfs(node.right)+1
+            nonlocal ans
+            ans = max(ans, left+right)
+            return max(left, right)
+        dfs(root)
+        return ans
+```
+
 ## [LC124.二叉树中的最大路径和](https://leetcode.cn/problems/binary-tree-maximum-path-sum/description/?envType=problem-list-v2&envId=2cktkvj&)
 **给定一个非空二叉树，返回其最大路径和。**
 题解：
@@ -554,6 +579,31 @@ class Solution:
         return ans
 ```
 
+## [LC.39 组合总和](https://leetcode.cn/problems/combination-sum/description/?envType=problem-list-v2&envId=2cktkvj&)
+**给你一个 无重复元素 的整数数组 candidates 和一个目标整数 target ，找出 candidates 中可以使数字和为目标数 target 的 所有 不同组合 ，并以列表形式返回。你可以按 任意顺序 返回这些组合。**
+
+题解：选或不选
+```python
+class Solution:
+    def combinationSum(self, candidates: List[int], target: int) -> List[List[int]]:
+        n = len(candidates)
+        path = []
+        ans = []
+        def dfs(i, t):
+            if t==0:
+                ans.append(path.copy())
+                return
+            if i<0 or t<0:
+                return
+            # 不选
+            dfs(i-1, t)
+            # 选
+            path.append(candidates[i])
+            dfs(i, t-candidates[i])
+            path.pop()
+        dfs(n-1, target)
+        return ans 
+```
 
 
 # 图论
@@ -680,6 +730,54 @@ class Solution:
             return max(nums[i]+dfs(i-2), dfs(i-1))
         return dfs(n-1)
 ```
+
+## [LC337.打家劫舍III](https://leetcode.cn/problems/house-robber-iii/description/?envType=problem-list-v2&envId=2cktkvj&)
+**小偷又发现了一个新的可行窃的地区。这个地区只有一个入口，我们称之为 root 。**
+**除了 root 之外，每栋房子有且只有一个“父“房子与之相连。一番侦察之后，聪明的小偷意识到“这个地方的所有房屋的排列类似于一棵二叉树”。 如果 两个直接相连的房子在同一天晚上被打劫 ，房屋将自动报警。**
+**给定二叉树的 root 。返回 在不触动警报的情况下 ，小偷能够盗取的最高金额 。**
+
+题解: 树形DP，对每个节点，选或不选
+```python
+class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
+
+class Solution:
+    def rob(self, root: Optional[TreeNode]) -> int:
+        @cache
+        def dfs(node):
+            if node is None:
+                return 0, 0
+            l_rob, l_norob = dfs(node.left)
+            r_rob, r_norob = dfs(node.right)
+            rob = l_norob + r_norob + node.val
+            norob = max(l_rob, l_norob) + max(r_rob, r_norob)
+            return rob, norob
+            
+        return max(dfs(root))
+
+```
+
+## [LC64. 最小路径和](https://leetcode.cn/problems/minimum-path-sum/description/?envType=problem-list-v2&envId=2cktkvj&)
+**给定一个包含非负整数的 m x n 网格 grid ，请找出一条从左上角到右下角的路径，使得路径上的数字总和为最小。**
+**说明：每次只能向下或者向右移动一步。**
+
+题解：
+```python
+class Solution:
+    def minPathSum(self, grid: List[List[int]]) -> int:
+        m,n = len(grid), len(grid[0])
+        @cache
+        def dfs(i,j):
+            if i==0 and j==0: return grid[i][j]
+            if i==0: return dfs(i, j-1)+grid[i][j]
+            if j==0: return dfs(i-1, j)+grid[i][j]
+            return min(dfs(i-1, j), dfs(i, j-1))+grid[i][j]
+        return dfs(m-1, n-1)
+```
+
 
 ## [LC72. 编辑距离](https://leetcode.cn/problems/edit-distance/description/?envType=problem-list-v2&envId=2cktkvj&)
 **给你两个单词 word1 和 word2， 请返回将 word1 转换成 word2 所使用的最少操作数 。**
