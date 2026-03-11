@@ -174,6 +174,29 @@ class Solution:
         return ans
 ```
 
+## [LC105. 从前序与中序遍历序列构造二叉树](https://leetcode.cn/problems/construct-binary-tree-from-preorder-and-inorder-traversal/description/?envType=problem-list-v2&envId=2cktkvj&)
+**给定两个整数数组 preorder 和 inorder ，其中 preorder 是二叉树的先序遍历，inorder 是同一棵树的中序遍历，请构造二叉树并返回其根节点。**
+
+题解：递归
+```python
+class TreeNode:
+    def __init__(self, val = 0, left = None, right = None):
+        self.val = val
+        self.left = left
+        self.right = right
+
+class Solution:
+    def buildTree(self, preorder: List[int], inorder: List[int]) -> Optional[TreeNode]:
+        if not preorder and not inorder:
+            return None
+        for i,x in enumerate(inorder):
+            if x==preorder[0]: break
+        left = self.buildTree(preorder[1:1+i], inorder[:i])
+        right = self.buildTree(preorder[1+i:], inorder[i+1:])
+        return TreeNode(val = preorder[0], left = left, right =right)
+```
+
+
 # 矩阵
 ## [LC54. 螺旋矩阵](https://leetcode.cn/problems/spiral-matrix/description/?envType=problem-list-v2&envId=2cktkvj&)
 **给你一个 m 行 n 列的矩阵 matrix ，请按照 顺时针螺旋顺序 ，返回矩阵中的所有元素。**
@@ -195,6 +218,22 @@ class Solution:
                 idx+=1
             x,y = x+directions[idx%4][0], y+directions[idx%4][1]
         return ans
+```
+
+## [LC48. 旋转图像](https://leetcode.cn/problems/rotate-image/description/?envType=problem-list-v2&envId=2cktkvj&)
+**给定一个 n × n 的二维矩阵 matrix 表示一个图像。请你将图像顺时针旋转 90 度。**
+
+题解：
+```python
+class Solution:
+    def rotate(self, matrix: List[List[int]]) -> None:
+        m, n = len(matrix), len(matrix[0])
+        for i in range(m):
+            for j in range(i):
+                matrix[i][j], matrix[j][i] = matrix[j][i], matrix[i][j]
+        
+        for row in matrix:
+            row = row.reverse()
 ```
 
 
@@ -398,6 +437,24 @@ class Solution:
             st.append(i)
         return ans     
 ```
+## [LC75. 颜色分类](https://leetcode.cn/problems/sort-colors/description/?envType=problem-list-v2&envId=2cktkvj&)
+**给定一个包含红色、白色和蓝色、共 n 个元素的数组 nums ，原地对它们进行排序，使得相同颜色的元素相邻，并按照红色、白色、蓝色顺序排列。**
+
+题解：维护数组中0的个数p0以及0和1的个数p1,将nums[p0]=0,nums[p1]=1
+```python
+class Solution:
+    def sortColors(self, nums: List[int]) -> None:
+        p0 = p1 = 0
+        for i, x in enumerate(nums):
+            nums[i]=2
+            if x<=1:
+                nums[p1]=0
+                p1+=1
+            if x==0:
+                nums[p0]=1
+                p0+=1
+```
+
 
 # 回溯
 
@@ -772,6 +829,53 @@ class Solution:
             ans = max(ans, max_res)
         return ans
             
+```
+
+# 贪心
+
+## [LC581.最短无序连续子数组](https://leetcode.cn/problems/shortest-unsorted-continuous-subarray/description/?envType=problem-list-v2&envId=2cktkvj&)
+**给你一个整数数组 nums ，你需要找出一个 连续子数组 ，如果对这个子数组进行升序排序，那么整个数组都会变为升序排序。**
+**请你找出符合题意的 最短 子数组，并输出它的长度。**
+
+题解:从左到右遍历，通过维护最大值找到最后一个下降的点，该点即为right。遍历完，最后一个right即为乱序区间的右边界，right右边是非递减区间
+同理，从右到左遍历，通过维护最小值找到最后一个上升的点，该点即为left。left左边是非递减区间
+[left,right]即为题目中的乱序区间
+
+```python
+class Solution:
+    def findUnsortedSubarray(self, nums: List[int]) -> int:
+        n = len(nums)
+        right, left = 0, n-1
+        pre_max, suf_min = nums[0], nums[-1]
+        for i in range(n):
+            if nums[i]>=pre_max:
+                pre_max = nums[i]
+            else:
+                right = i
+            if nums[n-i-1]<=suf_min:
+                suf_min = nums[n-i-1]
+            else:
+                left = n-i-1
+        return 0 if right == 0 else right-left+1
+```
+
+## [LC56. 合并区间](https://leetcode.cn/problems/merge-intervals/description/?envType=problem-list-v2&envId=2cktkvj&)
+**以数组 intervals 表示若干个区间的集合，其中单个区间为 intervals[i] = [starti, endi] 。请你合并所有重叠的区间，并返回 一个不重叠的区间数组，该数组需恰好覆盖输入中的所有区间 。**
+
+题解：
+```python
+class Solution:
+    def merge(self, intervals: List[List[int]]) -> List[List[int]]:
+        intervals = sorted(intervals, key=lambda x: x[0])
+        left, right = intervals[0][0], intervals[0][1]
+        ans = []
+        for p in intervals:
+            if ans and p[0]<= ans[-1][1]:
+                ans[-1][1] = max(ans[-1][1], p[1])
+            else:
+                ans.append(p)
+        return ans
+
 ```
 
 # 栈

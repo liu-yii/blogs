@@ -303,8 +303,38 @@ class RotaryEmbedding(nn.Module):
         q2 = torch.stack([-q[..., 1::2], q[..., ::2]], dim=-1)
         q2 = q2.reshape(q.shape).contiguous()
         return q * cos_pos + q2 * sin_pos
-
 ```
+
+5. LayerNorm, BatchNorm, InstanceNorm, GroupNorm之间的区别
+- **LayerNorm**：对每个样本的所有特征进行归一化（**沿着（C, H, W）维度计算**），适用于Transformer等序列模型，计算独立于批次大小。
+- **BatchNorm**：对每个特征在一个批次内进行归一化（**沿着（B, H, W）维度计算**），适用于卷积神经网络，依赖于批次大小。
+- **InstanceNorm**：对每个样本的每个特征进行归一化（**沿着（H, W）维度计算**），适用于风格迁移等任务，独立于批次大小。
+- **GroupNorm**：将特征分成多个组，对每个组进行归一化（**沿着（C//num_groups, H, W）维度计算**），适用于各种任务，独立于批次大小。
+
+    四种归一化方法的核心公式是一致的：
+    $$
+    y = \frac{x-\mu}{\sqrt{\sigma^2+\epsilon}}\gamma+\beta
+    $$
+
+6. RMSNorm
+RMSNorm是LayerNorm的一个变体，RMSNorm 的核心思想建立在一个反直觉的实验发现上：在 LayerNorm 中，真正对稳定训练起决定性作用的是“缩放”（除以方差），而不是“平移”（减去均值）。
+$$
+RMS(x) = \sqrt{\frac{1}{d}\sum_{i=1}^d x_{i}^{2}}
+$$
+$$
+y = \frac{x}{RMS(x)+\epsilon}\gamma
+$$
+
+7. 比较常见的LLM架构，例如Encoder-Only, Decoder-Only, Encoder-Decoder
+    
+    Encoder-Only: 去掉了 Transformer 的生成部分，只保留了用于理解输入内容的部分。通过Masked language modeling方法训练
+
+    Decoder-Only：去除了专门的编码器，仅通过解码器来完成所有任务。采用了Causal Attention，每个token只能看到它自己和之前的token，不能看到未来的token。通过自回归的方式训练，即next-token prediction。
+
+    Encoder-Decoder: 同时包含编码器和解码器两部分，编码器负责理解输入内容，解码器负责生成输出内容。编码器和解码器之间通过Cross-Attention进行信息交互。通过seq2seq的方式进行训练。
+
+    当前主流的架构是Decoder-Only，原因在于：1. scaling laws，研究发现，随着参数量和数据的增加，Decoder-Only 模型在“预测下一个词”这个简单任务上展现出了惊人的泛化能力（即“涌现能力”），足以覆盖几乎所有自然语言理解任务。2. 
+
 
 
 ## 强化学习
