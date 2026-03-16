@@ -819,6 +819,26 @@ class Solution:
         return dfs(m,n)
 ```
 
+## [LC279. 完全平方数](https://leetcode.cn/problems/perfect-squares/description/?envType=problem-list-v2&envId=2cktkvj&)
+**给你一个整数 n ，返回 和为 n 的完全平方数的最少数量 。**
+**完全平方数 是一个整数，其值等于另一个整数的平方；换句话说，其值等于一个整数自乘的积。例如，1、4、9 和 16 都是完全平方数，而 3 和 11 不是。**
+
+题解：选或不选
+```python
+@cache
+def dfs(i, j):
+    if j==0:
+        return inf if i else 0
+    if j*j>i:    
+        return dfs(i, j-1)
+    return min(dfs(i-j*j, j)+1, dfs(i, j-1))
+
+class Solution:
+    def numSquares(self, n):
+        return dfs(n, isqrt(n))
+```
+
+
 ## [LC322. 零钱兑换](https://leetcode.cn/problems/coin-change/description/?envType=problem-list-v2&envId=2cktkvj&)
 **给你一个整数数组 coins ，表示不同面额的硬币；以及一个整数 amount ，表示总金额。**
 **计算并返回可以凑成总金额所需的 最少的硬币个数 。如果没有任何一种硬币组合能组成总金额，返回 -1 。**
@@ -928,6 +948,31 @@ class Solution:
         return ans
             
 ```
+## [LC139. 单词拆分](https://leetcode.cn/problems/word-break/description/?envType=problem-list-v2&envId=2cktkvj&)
+**给你一个字符串 s 和一个字符串列表 wordDict 作为字典。如果可以利用字典中出现的一个或多个单词拼接出 s 则返回 true。**
+**注意：不要求字典中出现的单词全部都使用，并且字典中的单词可以重复使用。**
+
+题解：递归
+```python
+class Solution:
+    def wordBreak(self, s: str, wordDict: List[str]) -> bool:
+        max_len = -inf
+        for word in wordDict:
+            max_len = max(max_len, len(word))
+        words = set(wordDict)
+        @cache
+        def dfs(i):
+            if i==0:
+                return True
+            for j in range(i-1, max(i-max_len-1, -1), -1):
+                if s[j:i] in words and dfs(j):
+                    return True
+            return False
+        return dfs(len(s))
+```
+
+
+
 
 # 贪心
 
@@ -960,12 +1005,11 @@ class Solution:
 ## [LC56. 合并区间](https://leetcode.cn/problems/merge-intervals/description/?envType=problem-list-v2&envId=2cktkvj&)
 **以数组 intervals 表示若干个区间的集合，其中单个区间为 intervals[i] = [starti, endi] 。请你合并所有重叠的区间，并返回 一个不重叠的区间数组，该数组需恰好覆盖输入中的所有区间 。**
 
-题解：
+题解：先按照区间左端点排序，然后维护一个当前区间[left, right]，如果下一个区间的左端点在当前区间内，则更新当前区间的右端点为两者右端点的较大值；如果下一个区间的左端点在当前区间外，则说明当前区间已经结束，将其加入答案，并将下一个区间作为新的当前区间
 ```python
 class Solution:
     def merge(self, intervals: List[List[int]]) -> List[List[int]]:
         intervals = sorted(intervals, key=lambda x: x[0])
-        left, right = intervals[0][0], intervals[0][1]
         ans = []
         for p in intervals:
             if ans and p[0]<= ans[-1][1]:
@@ -975,6 +1019,93 @@ class Solution:
         return ans
 
 ```
+
+## [LC55. 跳跃游戏](https://leetcode.cn/problems/jump-game/description/?envType=problem-list-v2&envId=2cktkvj&)
+**给你一个非负整数数组 nums ，你最初位于数组的 第一个下标 。数组中的每个元素代表你在该位置可以跳跃的最大长度。**
+**判断你是否能够到达最后一个下标，如果可以，返回 true ；否则，返回 false 。**
+
+题解：维护最远能够到达的地方
+```python
+class Solution:
+    def canJump(self, nums):
+        max_right = 0
+        for i,n in enumerate(nums):
+            if i<=max_right:
+                max_right = max(max_right, i+n)
+            if max_right>=len(nums)-1:
+                return True
+        return False
+
+```
+
+## [LC45.跳跃游戏II](https://leetcode.cn/problems/jump-game-ii/description/?envType=problem-list-v2&envId=2cktkvj&)
+**给你一个非负整数数组 nums ，你最初位于数组的第一个位置。**
+**数组中的每个元素代表你在该位置可以跳跃的最大长度。**
+**你的目标是使用最少的跳跃次数到达数组的最后一个位置。**
+**假设你总是可以到达数组的最后一个位置。**
+
+题解：造桥，每次跳跃都选能跳的最远的桥
+```python
+class Solution:
+    def jump(self, nums: List[int]) -> int:
+        ans = 0
+        cur_right = 0
+        next_right = 0
+        for i in range(len(nums)-1):
+            next_right = max(next_right, i+nums[i])
+            if i==cur_right:
+                ans+=1
+                cur_right = next_right
+        return ans
+
+```
+
+类似题目:[LC1326. 灌溉花园的最少水龙头数目](https://leetcode.cn/problems/minimum-number-of-taps-to-open-to-water-a-garden/description/?envType=problem-list-v2&envId=2cktkvj&)
+```python
+class Solution:
+    def minTaps(self, n, ranges):
+        right_most = [0]*(n+1)
+        for i,r in enumerate(ranges):
+            left = max(i-r, 0)
+            right_most[left] = max(right_most[left], i+r)
+
+        ans = 0
+        cur_right = 0
+        next_right = 0
+        for i in range(n):
+            next_right = max(next_right, right_most[i])
+            if i==cur_right:
+                if i==next_right:
+                    return -1
+                cur_right = next_right
+                ans+=1
+        return ans
+
+```
+
+## [LC763. 划分字母区间](https://leetcode.cn/problems/partition-labels/description/?envType=problem-list-v2&envId=2cktkvj&)
+**给你一个字符串 s 。我们要把这个字符串划分为尽可能多的片段，同一字母最多出现在一个片段中。**
+**注意，划分结果需要满足：将所有划分结果按顺序连接，得到的字符串仍然是 s 。**
+**返回一个表示每个字符串片段的长度的列表。**
+
+                
+题解：本质合并区间，找到每个字符最后出现的位置
+```python
+class Solution:
+    def partitionLabels(self, s: str) -> List[int]:
+        ans = []
+        last = {c:i for i,c in enumerate(s)}
+        start = end = 0
+        for i, c in enumerate(s):
+            end = max(end, last[c])
+            if end==i:
+                ans.append(end-start+1)
+                start=i+1
+        return ans            
+```
+            
+
+
 
 # 栈
 ## [LC394. 字符串解码](https://leetcode.cn/problems/decode-string/description/?envType=problem-list-v2&envId=2cktkvj&)
@@ -986,6 +1117,7 @@ class Solution:
 题解：
 ```python
 class Solution:
+    # 递归
     def decodeString(self, s: str) -> str:
         if not s: return s
         if s[0].isalpha():
