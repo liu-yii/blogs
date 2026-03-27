@@ -4,13 +4,14 @@ draft: false
 title: '刷题记录-Leetcode Hot 100'
 ---
 
-# 链表
+## 链表
 
-## [LC160.相交链表](https://leetcode.cn/problems/intersection-of-two-linked-lists/?envType=problem-list-v2&envId=2cktkvj&)
+### [LC160.相交链表](https://leetcode.cn/problems/intersection-of-two-linked-lists/?envType=problem-list-v2&envId=2cktkvj&)
 ![160](img/160.png)
 
 题解：
-参考[灵茶山艾府](https://leetcode.cn/problems/intersection-of-two-linked-lists/solutions/2958778/tu-jie-yi-zhang-tu-miao-dong-xiang-jiao-m6tg1/?envType=problem-list-v2&envId=2cktkvj&)题解
+参考[灵茶山艾府](https://leetcode.cn/problems/intersection-of-two-linked-lists/solutions/2958778/tu-jie-yi-zhang-tu-miao-dong-xiang-jiao-m6tg1/?envType=problem-list-v2&envId=2cktkvj&)
+**核心思想是两条链表满足 $(x+z)+y = (y+z)+x$，z为公共部分的长度**
 ```python
 # Definition for singly-linked list.
 # class ListNode:
@@ -27,12 +28,32 @@ class Solution:
             p2 = p2.next if p2 else headA
         return p1
 ```
+### [LC206.反转链表](https://leetcode.cn/problems/reverse-linked-list/description/?envType=problem-list-v2&envId=2cktkvj&)
+**给你单链表的头节点 head ，请你反转链表，并返回反转后的链表。**
 
-**核心思想是两条链表满足 $(x+z)+y = (y+z)+x$，z为公共部分的长度**
+题解：
+```python
+class ListNode:
+    def __init__(self, val=0, next=None):
+        self.val = val
+        self.next = next
 
-# 树
+class Solution:
+    def reverseList(self, head: Optional[ListNode]) -> Optional[ListNode]:
+        cur = head
+        pre = None
+        while cur:
+            nxt = cur.next
+            cur.next = pre
+            pre = cur
+            cur = nxt
+        return pre
 
-## [LC236.二叉树的最近公共祖先](https://leetcode.cn/problems/lowest-common-ancestor-of-a-binary-tree/description/?envType=problem-list-v2&envId=2cktkvj&)
+```
+
+## 树
+
+### [LC236.二叉树的最近公共祖先](https://leetcode.cn/problems/lowest-common-ancestor-of-a-binary-tree/description/?envType=problem-list-v2&envId=2cktkvj&)
 
 ![236](img/236.png)
 
@@ -56,7 +77,8 @@ class Solution:
             return root
         return left or right
 ```
-## [LC437.路径总和II](https://leetcode.cn/problems/path-sum-ii/description/?envType=problem-list-v2&envId=2cktkvj&)
+
+### [LC437.路径总和II](https://leetcode.cn/problems/path-sum-ii/description/?envType=problem-list-v2&envId=2cktkvj&)
 **给定一个二叉树, 找到该树中两个指定节点的最近公共祖先。**
 题解：
 ```python
@@ -85,7 +107,7 @@ class Solution:
         return ans
 ```
 
-## [LC236.二叉树的最近公共祖先](https://leetcode.cn/problems/lowest-common-ancestor-of-a-binary-tree/description/?envType=problem-list-v2&envId=2cktkvj&)
+### [LC236.二叉树的最近公共祖先](https://leetcode.cn/problems/lowest-common-ancestor-of-a-binary-tree/description/?envType=problem-list-v2&envId=2cktkvj&)
 **给定一个二叉树, 找到该树中两个指定节点的最近公共祖先。**
 题解：临界条件：当前节点是空/p/q
 
@@ -110,7 +132,7 @@ class Solution:
         return dfs(root, p, q)
 ```
 
-## [LC543.二叉树的直径](https://leetcode.cn/problems/diameter-of-binary-tree/description/?envType=problem-list-v2&envId=2cktkvj&)
+### [LC543.二叉树的直径](https://leetcode.cn/problems/diameter-of-binary-tree/description/?envType=problem-list-v2&envId=2cktkvj&)
 **给定一棵二叉树，你需要计算它的直径长度。一棵二叉树的直径长度是任意两个结点路径长度中的最大值。这条路径可能穿过也可能不穿过根结点。**
 题解：对于每个节点，计算左右子树的深度，更新答案为左右子树深度之和
 ```python
@@ -135,7 +157,7 @@ class Solution:
         return ans
 ```
 
-## [LC124.二叉树中的最大路径和](https://leetcode.cn/problems/binary-tree-maximum-path-sum/description/?envType=problem-list-v2&envId=2cktkvj&)
+### [LC124.二叉树中的最大路径和](https://leetcode.cn/problems/binary-tree-maximum-path-sum/description/?envType=problem-list-v2&envId=2cktkvj&)
 **给定一个非空二叉树，返回其最大路径和。**
 题解：
 ```python
@@ -160,7 +182,7 @@ class Solution:
         return ans
 ```
 
-## [LC199.二叉树的右视图](https://leetcode.cn/problems/binary-tree-right-side-view/description/?envType=problem-list-v2&envId=2cktkvj&)
+### [LC199.二叉树的右视图](https://leetcode.cn/problems/binary-tree-right-side-view/description/?envType=problem-list-v2&envId=2cktkvj&)
 **给定一个二叉树的 根节点 root，想象自己站在它的右侧，按照从顶部到底部的顺序，返回从右侧所能看到的节点值。**
 
 题解：层序遍历，每次取每一层的最后一个节点。
@@ -199,7 +221,7 @@ class Solution:
         return ans
 ```
 
-## [LC105. 从前序与中序遍历序列构造二叉树](https://leetcode.cn/problems/construct-binary-tree-from-preorder-and-inorder-traversal/description/?envType=problem-list-v2&envId=2cktkvj&)
+### [LC105. 从前序与中序遍历序列构造二叉树](https://leetcode.cn/problems/construct-binary-tree-from-preorder-and-inorder-traversal/description/?envType=problem-list-v2&envId=2cktkvj&)
 **给定两个整数数组 preorder 和 inorder ，其中 preorder 是二叉树的先序遍历，inorder 是同一棵树的中序遍历，请构造二叉树并返回其根节点。**
 
 题解：递归
@@ -222,8 +244,8 @@ class Solution:
 ```
 
 
-# 矩阵
-## [LC54. 螺旋矩阵](https://leetcode.cn/problems/spiral-matrix/description/?envType=problem-list-v2&envId=2cktkvj&)
+## 矩阵
+### [LC54. 螺旋矩阵](https://leetcode.cn/problems/spiral-matrix/description/?envType=problem-list-v2&envId=2cktkvj&)
 **给你一个 m 行 n 列的矩阵 matrix ，请按照 顺时针螺旋顺序 ，返回矩阵中的所有元素。**
 
 题解：模拟，标记
@@ -245,7 +267,7 @@ class Solution:
         return ans
 ```
 
-## [LC48. 旋转图像](https://leetcode.cn/problems/rotate-image/description/?envType=problem-list-v2&envId=2cktkvj&)
+### [LC48. 旋转图像](https://leetcode.cn/problems/rotate-image/description/?envType=problem-list-v2&envId=2cktkvj&)
 **给定一个 n × n 的二维矩阵 matrix 表示一个图像。请你将图像顺时针旋转 90 度。**
 
 题解：
@@ -262,8 +284,8 @@ class Solution:
 ```
 
 
-# 滑动窗口
-## [LC3. 无重复字符的最长子串](https://leetcode.cn/problems/longest-substring-without-repeating-characters/description/?envType=problem-list-v2&envId=2cktkvj&)
+## 滑动窗口
+### [LC3. 无重复字符的最长子串](https://leetcode.cn/problems/longest-substring-without-repeating-characters/description/?envType=problem-list-v2&envId=2cktkvj&)
 **给定一个字符串 s ，请你找出其中不含有重复字符的 最长子串 的长度。**
 
 题解：
@@ -283,7 +305,7 @@ class Solution:
         return ans  
 ```
 
-## [LC438. 找到字符串中所有字母异位词](https://leetcode.cn/problems/find-all-anagrams-in-a-string/description/?envType=problem-list-v2&envId=2cktkvj&)
+### [LC438. 找到字符串中所有字母异位词](https://leetcode.cn/problems/find-all-anagrams-in-a-string/description/?envType=problem-list-v2&envId=2cktkvj&)
 **给定两个字符串 s 和 p，找到 s 中所有 p 的 异位词 的子串，返回这些子串的起始索引。不考虑答案输出的顺序。**
 
 题解：
@@ -304,7 +326,7 @@ class Solution:
         return ans
 ```
 
-## [LC560. 和为 K 的子数组](https://leetcode.cn/problems/subarray-sum-equals-k/description/?envType=problem-list-v2&envId=2cktkvj&)
+### [LC560. 和为 K 的子数组](https://leetcode.cn/problems/subarray-sum-equals-k/description/?envType=problem-list-v2&envId=2cktkvj&)
 **给你一个整数数组 nums 和一个整数 k ，请你统计并返回 该数组中和为 k 的子数组的个数 。**
 
 题解：哈希表+前缀和，**两数之和的变体**
@@ -324,7 +346,7 @@ class Solution:
         return ans
 ```
 
-## [LC239. 滑动窗口最大值](https://leetcode.cn/problems/sliding-window-maximum/description/?envType=problem-list-v2&envId=2cktkvj&)
+### [LC239. 滑动窗口最大值](https://leetcode.cn/problems/sliding-window-maximum/description/?envType=problem-list-v2&envId=2cktkvj&)
 **给你一个整数数组 nums，有一个大小为 k 的滑动窗口从数组的最左侧移动到数组的最右侧。你只可以看到在滑动窗口内的 k 个数字。滑动窗口每次只向右移动一位。返回 滑动窗口中的最大值 。**
 
 题解：使用单调队列存储窗口内的值
@@ -349,7 +371,7 @@ class Solution:
 
 
 
-## [LC76. 最小覆盖子串](https://leetcode.cn/problems/minimum-window-substring/description/?envType=problem-list-v2&envId=2cktkvj&)
+### [LC76. 最小覆盖子串](https://leetcode.cn/problems/minimum-window-substring/description/?envType=problem-list-v2&envId=2cktkvj&)
 **给你一个字符串 s 、一个字符串 t 。返回 s 中涵盖 t 所有字符的最小子串。如果 s 中不存在涵盖 t 所有字符的子串，则返回空字符串 "" 。**
 
 题解：滑动窗口，在循环内更新
@@ -372,8 +394,8 @@ class Solution:
         return ans         
 ```
 
-# 双指针
-## [LC15.三数之和](https://leetcode.cn/problems/3sum/description/?envType=problem-list-v2&envId=2cktkvj&)
+## 双指针
+### [LC15.三数之和](https://leetcode.cn/problems/3sum/description/?envType=problem-list-v2&envId=2cktkvj&)
 **给你一个整数数组 nums ，判断是否存在三元组 [nums[i], nums[j], nums[k]] 满足 i != j、i != k 且 j != k ，同时还满足 nums[i] + nums[j] + nums[k] == 0 。请你返回所有和为 0 且不重复的三元组。**
 
 题解：
@@ -411,7 +433,7 @@ class Solution:
         return ans
 ```
 
-## [LC42. 接雨水](https://leetcode.cn/problems/trapping-rain-water/description/?envType=problem-list-v2&envId=2cktkvj&)
+### [LC42. 接雨水](https://leetcode.cn/problems/trapping-rain-water/description/?envType=problem-list-v2&envId=2cktkvj&)
 **给定 n 个非负整数表示每个宽度为 1 的柱子的高度图，计算按此排列的柱子，下雨之后能接多少雨水。**
 
 题解：
@@ -462,7 +484,7 @@ class Solution:
             st.append(i)
         return ans     
 ```
-## [LC75. 颜色分类](https://leetcode.cn/problems/sort-colors/description/?envType=problem-list-v2&envId=2cktkvj&)
+### [LC75. 颜色分类](https://leetcode.cn/problems/sort-colors/description/?envType=problem-list-v2&envId=2cktkvj&)
 **给定一个包含红色、白色和蓝色、共 n 个元素的数组 nums ，原地对它们进行排序，使得相同颜色的元素相邻，并按照红色、白色、蓝色顺序排列。**
 
 题解：维护数组中0的个数p0以及0和1的个数p1,将nums[p0]=0,nums[p1]=1
@@ -481,9 +503,9 @@ class Solution:
 ```
 
 
-# 回溯
+## 回溯
 
-## [LC46.全排列](https://leetcode.cn/problems/permutations/description/?envType=problem-list-v2&envId=2cktkvj&)
+### [LC46.全排列](https://leetcode.cn/problems/permutations/description/?envType=problem-list-v2&envId=2cktkvj&)
 **给定一个不含重复数字的数组 nums ，返回其 所有可能的全排列 。你可以 按任意顺序 返回答案。**
 
 题解：枚举位置，选填数字，把path看成N个位置，每个位置都有N种选法，但是要注意已经选过的数字不能再选。每一层递归负责填path[i]
@@ -508,7 +530,7 @@ class Solution:
         return ans      
 ```
 
-## [LC78.子集](https://leetcode.cn/problems/subsets/description/?envType=problem-list-v2&envId=2cktkvj&)
+### [LC78.子集](https://leetcode.cn/problems/subsets/description/?envType=problem-list-v2&envId=2cktkvj&)
 **给你一个整数数组 nums ，数组中的元素 互不相同 。返回该数组所有可能的子集（幂集）。**
 
 题解：选或不选
@@ -535,7 +557,7 @@ class Solution:
         return ans
 ```
 
-## [LC17.电话号码的字母组合](https://leetcode.cn/problems/letter-combinations-of-a-phone-number/description/?envType=problem-list-v2&envId=2cktkvj&)
+### [LC17.电话号码的字母组合](https://leetcode.cn/problems/letter-combinations-of-a-phone-number/description/?envType=problem-list-v2&envId=2cktkvj&)
 **给定一个仅包含数字 2-9 的字符串，返回所有它能表示的字母组合。答案可以按 任意顺序 返回。**
 题解：
 ```python
@@ -557,7 +579,7 @@ class Solution:
             
 ```
 
-## [LC22.括号生成](https://leetcode.cn/problems/generate-parentheses/description/?envType=problem-list-v2&envId=2cktkvj&)
+### [LC22.括号生成](https://leetcode.cn/problems/generate-parentheses/description/?envType=problem-list-v2&envId=2cktkvj&)
 **数字 n 代表生成括号的对数，请你设计一个函数，用于能够生成所有可能的并且 有效的 括号组合。**
 题解：
 ```python
@@ -579,7 +601,7 @@ class Solution:
         return ans
 ```
 
-## [LC.39 组合总和](https://leetcode.cn/problems/combination-sum/description/?envType=problem-list-v2&envId=2cktkvj&)
+### [LC.39 组合总和](https://leetcode.cn/problems/combination-sum/description/?envType=problem-list-v2&envId=2cktkvj&)
 **给你一个 无重复元素 的整数数组 candidates 和一个目标整数 target ，找出 candidates 中可以使数字和为目标数 target 的 所有 不同组合 ，并以列表形式返回。你可以按 任意顺序 返回这些组合。**
 
 题解：选或不选
@@ -606,9 +628,9 @@ class Solution:
 ```
 
 
-# 图论
+## 图论
 
-## [LC207.课程表](https://leetcode.cn/problems/course-schedule/description/?envType=problem-list-v2&envId=2cktkvj&)
+### [LC207.课程表](https://leetcode.cn/problems/course-schedule/description/?envType=problem-list-v2&envId=2cktkvj&)
 **你这个学期必须选修 numCourses 门课程，记为 0 到 numCourses - 1 。**
 
 **在选修某些课程之前需要一些先修课程。 先修课程按数组 prerequisites 给出，其中 prerequisites[i] = [ai, bi] ，表示如果要学习课程 ai 则 必须 先学习课程  bi 。**
@@ -641,7 +663,7 @@ class Solution:
         return True
 ```
 
-## [LC200.岛屿数量](https://leetcode.cn/problems/number-of-islands/description/?envType=problem-list-v2&envId=2cktkvj&)
+### [LC200.岛屿数量](https://leetcode.cn/problems/number-of-islands/description/?envType=problem-list-v2&envId=2cktkvj&)
 **给你一个由 '1'（陆地）和 '0'（水）组成的的二维网格，请你计算网格中岛屿的数量。**
 
 题解：**DFS**
@@ -664,7 +686,7 @@ class Solution:
         return ans
 ```
 
-## [LC994.腐烂的橘子](https://leetcode.cn/problems/rotting-oranges/description/?envType=problem-list-v2&envId=2cktkvj&)
+### [LC994.腐烂的橘子](https://leetcode.cn/problems/rotting-oranges/description/?envType=problem-list-v2&envId=2cktkvj&)
 **在给定的 m x n 网格 grid 中，每个单元格可以有以下三个值之一：**
 **值 0 代表空单元格；**
 **值 1 代表新鲜橘子；**
@@ -700,8 +722,8 @@ class Solution:
         return -1 if cnt else ans
 ```
 
-# 动态规划
-## [LC198. 打家劫舍](https://leetcode.cn/problems/house-robber/description/?envType=problem-list-v2&envId=2cktkvj&)
+## 动态规划
+### [LC198. 打家劫舍](https://leetcode.cn/problems/house-robber/description/?envType=problem-list-v2&envId=2cktkvj&)
 **你是一个专业的小偷，计划偷窃沿街的房屋。每间房内都藏有一定的现金，影响你偷窃的唯一制约因素就是相邻的房屋装有相互连通的防盗系统，如果两间相邻的房屋在同一晚上被小偷闯入，系统会自动报警。**
 **给定一个整数数组 nums ，表示一个环形街道上沿街的房屋，每个房屋内都藏有一定的现金。你不能同时偷窃相邻的两间房屋，否则会触发报警。**
 
@@ -731,7 +753,7 @@ class Solution:
         return dfs(n-1)
 ```
 
-## [LC337.打家劫舍III](https://leetcode.cn/problems/house-robber-iii/description/?envType=problem-list-v2&envId=2cktkvj&)
+### [LC337.打家劫舍III](https://leetcode.cn/problems/house-robber-iii/description/?envType=problem-list-v2&envId=2cktkvj&)
 **小偷又发现了一个新的可行窃的地区。这个地区只有一个入口，我们称之为 root 。**
 **除了 root 之外，每栋房子有且只有一个“父“房子与之相连。一番侦察之后，聪明的小偷意识到“这个地方的所有房屋的排列类似于一棵二叉树”。 如果 两个直接相连的房子在同一天晚上被打劫 ，房屋将自动报警。**
 **给定二叉树的 root 。返回 在不触动警报的情况下 ，小偷能够盗取的最高金额 。**
@@ -760,7 +782,7 @@ class Solution:
 
 ```
 
-## [LC64. 最小路径和](https://leetcode.cn/problems/minimum-path-sum/description/?envType=problem-list-v2&envId=2cktkvj&)
+### [LC64. 最小路径和](https://leetcode.cn/problems/minimum-path-sum/description/?envType=problem-list-v2&envId=2cktkvj&)
 **给定一个包含非负整数的 m x n 网格 grid ，请找出一条从左上角到右下角的路径，使得路径上的数字总和为最小。**
 **说明：每次只能向下或者向右移动一步。**
 
@@ -779,7 +801,7 @@ class Solution:
 ```
 
 
-## [LC72. 编辑距离](https://leetcode.cn/problems/edit-distance/description/?envType=problem-list-v2&envId=2cktkvj&)
+### [LC72. 编辑距离](https://leetcode.cn/problems/edit-distance/description/?envType=problem-list-v2&envId=2cktkvj&)
 **给你两个单词 word1 和 word2， 请返回将 word1 转换成 word2 所使用的最少操作数 。**
 **你可以对一个单词进行如下三种操作：**
 **插入一个字符**
@@ -819,7 +841,7 @@ class Solution:
         return dfs(m,n)
 ```
 
-## [LC279. 完全平方数](https://leetcode.cn/problems/perfect-squares/description/?envType=problem-list-v2&envId=2cktkvj&)
+### [LC279. 完全平方数](https://leetcode.cn/problems/perfect-squares/description/?envType=problem-list-v2&envId=2cktkvj&)
 **给你一个整数 n ，返回 和为 n 的完全平方数的最少数量 。**
 **完全平方数 是一个整数，其值等于另一个整数的平方；换句话说，其值等于一个整数自乘的积。例如，1、4、9 和 16 都是完全平方数，而 3 和 11 不是。**
 
@@ -839,7 +861,7 @@ class Solution:
 ```
 
 
-## [LC322. 零钱兑换](https://leetcode.cn/problems/coin-change/description/?envType=problem-list-v2&envId=2cktkvj&)
+### [LC322. 零钱兑换](https://leetcode.cn/problems/coin-change/description/?envType=problem-list-v2&envId=2cktkvj&)
 **给你一个整数数组 coins ，表示不同面额的硬币；以及一个整数 amount ，表示总金额。**
 **计算并返回可以凑成总金额所需的 最少的硬币个数 。如果没有任何一种硬币组合能组成总金额，返回 -1 。**
 **你可以认为每种硬币的数量是无限的。**
@@ -877,7 +899,7 @@ class Solution:
         return ans if ans<inf else -1
 ```
 
-## [LC494. 目标和](https://leetcode.cn/problems/target-sum/description/?envType=problem-list-v2&envId=2cktkvj&)
+### [LC494. 目标和](https://leetcode.cn/problems/target-sum/description/?envType=problem-list-v2&envId=2cktkvj&)
 **给你一个非负整数数组 nums 和一个整数 target 。**
 **你可以向数组中的每个整数添加 '+' 或 '-' ，并串联起所有整数，来构造一个表达式**
 **返回可以达到目标和的不同表达式的数目。**
@@ -899,7 +921,7 @@ class Solution:
         return dfs(len(nums)-1, s//2)
 ```
 
-## [LC300. 最长递增子序列](https://leetcode.cn/problems/longest-increasing-subsequence/description/?envType=problem-list-v2&envId=2cktkvj&)
+### [LC300. 最长递增子序列](https://leetcode.cn/problems/longest-increasing-subsequence/description/?envType=problem-list-v2&envId=2cktkvj&)
 **给你一个整数数组 nums ，找到其中最长严格递增子序列的长度。**
 **子序列 是由数组派生而来的序列，删除（或不删除）数组中的元素而不改变其余元素的顺序。例如，[3,6,2,7] 是数组 [0,3,1,6,2,2,7] 的子序列。**
 
@@ -931,7 +953,7 @@ class Solution:
         return len(g)
 ```
 
-## [LC152. 乘积最大子数组](https://leetcode.cn/problems/maximum-product-subarray/description/?envType=problem-list-v2&envId=2cktkvj&)
+### [LC152. 乘积最大子数组](https://leetcode.cn/problems/maximum-product-subarray/description/?envType=problem-list-v2&envId=2cktkvj&)
 **给你一个整数数组 nums ，请你找出数组中乘积最大的非空连续子数组（该子数组中至少包含一个数字），并返回该子数组所对应的乘积。**
 **测试用例的答案是一个 32-位 整数。**
 **子数组 是数组的连续子序列。**
@@ -948,7 +970,7 @@ class Solution:
         return ans
             
 ```
-## [LC139. 单词拆分](https://leetcode.cn/problems/word-break/description/?envType=problem-list-v2&envId=2cktkvj&)
+### [LC139. 单词拆分](https://leetcode.cn/problems/word-break/description/?envType=problem-list-v2&envId=2cktkvj&)
 **给你一个字符串 s 和一个字符串列表 wordDict 作为字典。如果可以利用字典中出现的一个或多个单词拼接出 s 则返回 true。**
 **注意：不要求字典中出现的单词全部都使用，并且字典中的单词可以重复使用。**
 
@@ -971,12 +993,38 @@ class Solution:
         return dfs(len(s))
 ```
 
+### [LC5. 最长回文子串](https://leetcode.cn/problems/longest-palindromic-substring/description/?envType=problem-list-v2&envId=2cktkvj&)
+**给你一个字符串 s，找到 s 中最长的回文子串。**
+**如果字符串的反序与原始字符串相同，则该字符串称为回文字符串。**
+
+题解：
+```python
+class Solution:
+    def longestPalindrome(self, s: str) -> str:
+        n = len(s)
+        ans_left = ans_right = 0
+        for i in range(n):
+            l = r = i
+            while l>=0 and r<n and s[l]==s[r]:
+                l-=1
+                r+=1
+            if r-l-1>ans_right-ans_left:
+                ans_left, ans_right = l+1, r
+        
+        for i in range(n-1):
+            l, r = i, i+1
+            while l>=0 and r<n and s[l]==s[r]:
+                l-=1
+                r+=1
+            if r-l-1>ans_right-ans_left:
+                ans_left, ans_right = l+1, r
+        return s[ans_left:ans_right]
+```
 
 
+## 贪心
 
-# 贪心
-
-## [LC581.最短无序连续子数组](https://leetcode.cn/problems/shortest-unsorted-continuous-subarray/description/?envType=problem-list-v2&envId=2cktkvj&)
+### [LC581.最短无序连续子数组](https://leetcode.cn/problems/shortest-unsorted-continuous-subarray/description/?envType=problem-list-v2&envId=2cktkvj&)
 **给你一个整数数组 nums ，你需要找出一个 连续子数组 ，如果对这个子数组进行升序排序，那么整个数组都会变为升序排序。**
 **请你找出符合题意的 最短 子数组，并输出它的长度。**
 
@@ -1002,7 +1050,7 @@ class Solution:
         return 0 if right == 0 else right-left+1
 ```
 
-## [LC56. 合并区间](https://leetcode.cn/problems/merge-intervals/description/?envType=problem-list-v2&envId=2cktkvj&)
+### [LC56. 合并区间](https://leetcode.cn/problems/merge-intervals/description/?envType=problem-list-v2&envId=2cktkvj&)
 **以数组 intervals 表示若干个区间的集合，其中单个区间为 intervals[i] = [starti, endi] 。请你合并所有重叠的区间，并返回 一个不重叠的区间数组，该数组需恰好覆盖输入中的所有区间 。**
 
 题解：先按照区间左端点排序，然后维护一个当前区间[left, right]，如果下一个区间的左端点在当前区间内，则更新当前区间的右端点为两者右端点的较大值；如果下一个区间的左端点在当前区间外，则说明当前区间已经结束，将其加入答案，并将下一个区间作为新的当前区间
@@ -1020,7 +1068,7 @@ class Solution:
 
 ```
 
-## [LC55. 跳跃游戏](https://leetcode.cn/problems/jump-game/description/?envType=problem-list-v2&envId=2cktkvj&)
+### [LC55. 跳跃游戏](https://leetcode.cn/problems/jump-game/description/?envType=problem-list-v2&envId=2cktkvj&)
 **给你一个非负整数数组 nums ，你最初位于数组的 第一个下标 。数组中的每个元素代表你在该位置可以跳跃的最大长度。**
 **判断你是否能够到达最后一个下标，如果可以，返回 true ；否则，返回 false 。**
 
@@ -1038,7 +1086,7 @@ class Solution:
 
 ```
 
-## [LC45.跳跃游戏II](https://leetcode.cn/problems/jump-game-ii/description/?envType=problem-list-v2&envId=2cktkvj&)
+### [LC45.跳跃游戏II](https://leetcode.cn/problems/jump-game-ii/description/?envType=problem-list-v2&envId=2cktkvj&)
 **给你一个非负整数数组 nums ，你最初位于数组的第一个位置。**
 **数组中的每个元素代表你在该位置可以跳跃的最大长度。**
 **你的目标是使用最少的跳跃次数到达数组的最后一个位置。**
@@ -1083,7 +1131,7 @@ class Solution:
 
 ```
 
-## [LC763. 划分字母区间](https://leetcode.cn/problems/partition-labels/description/?envType=problem-list-v2&envId=2cktkvj&)
+### [LC763. 划分字母区间](https://leetcode.cn/problems/partition-labels/description/?envType=problem-list-v2&envId=2cktkvj&)
 **给你一个字符串 s 。我们要把这个字符串划分为尽可能多的片段，同一字母最多出现在一个片段中。**
 **注意，划分结果需要满足：将所有划分结果按顺序连接，得到的字符串仍然是 s 。**
 **返回一个表示每个字符串片段的长度的列表。**
@@ -1107,8 +1155,8 @@ class Solution:
 
 
 
-# 栈
-## [LC394. 字符串解码](https://leetcode.cn/problems/decode-string/description/?envType=problem-list-v2&envId=2cktkvj&)
+## 栈
+### [LC394. 字符串解码](https://leetcode.cn/problems/decode-string/description/?envType=problem-list-v2&envId=2cktkvj&)
 **给你一个字符串 s ，根据下述规则反转字符串：**
 **所有非英文字母保留在原有位置。**
 **所有英文字母（小写或大写）位置反转。**
@@ -1152,8 +1200,7 @@ class Solution:
         return res
 ```
 
-# 单调栈
-## [LC739. 每日温度](https://leetcode.cn/problems/daily-temperatures/description/?envType=problem-list-v2&envId=2cktkvj&)
+### [LC739. 每日温度](https://leetcode.cn/problems/daily-temperatures/description/?envType=problem-list-v2&envId=2cktkvj&)
 **给定一个整数数组 temperatures ，表示每天的温度，返回一个数组 answer ，其中 answer[i] 是指在第 i 天之后，才会有更高的温度。如果气温在这之后都不会升高，请在该位置用 0 来代替。**
 
 题解：
@@ -1171,7 +1218,7 @@ class Solution:
         return ans
 ```
 
-## [LC84. 柱状图中最大的矩形](https://leetcode.cn/problems/largest-rectangle-in-histogram/description/?envType=problem-list-v2&envId=2cktkvj&)
+### [LC84. 柱状图中最大的矩形](https://leetcode.cn/problems/largest-rectangle-in-histogram/description/?envType=problem-list-v2&envId=2cktkvj&)
 **给定 n 个非负整数，用来表示柱状图中各个柱子的高度。每个柱子彼此相邻，且宽度为 1 。**
 **求在该柱状图中，能够勾勒出来的矩形的最大面积。**
 
@@ -1192,8 +1239,8 @@ class Solution:
         return ans
 ```
 
-# 二分查找
-## [LC35.搜索插入位置](https://leetcode.cn/problems/search-insert-position/description/?envType=problem-list-v2&envId=2cktkvj&)
+## 二分查找
+### [LC35.搜索插入位置](https://leetcode.cn/problems/search-insert-position/description/?envType=problem-list-v2&envId=2cktkvj&)
 **给定一个排序数组和一个目标值，在数组中找到目标值，并返回其索引。如果目标值不存在于数组中，返回它将会被按顺序插入的位置。**
 **请必须使用时间复杂度为 O(log n) 的算法。** 
 
@@ -1211,7 +1258,7 @@ class Solution
         return right
 ```
 
-## [LC74. 搜索二维矩阵](https://leetcode.cn/problems/search-a-2d-matrix/description/?envType=problem-list-v2&envId=2cktkvj&)
+### [LC74. 搜索二维矩阵](https://leetcode.cn/problems/search-a-2d-matrix/description/?envType=problem-list-v2&envId=2cktkvj&)
 **给你一个满足下述两条属性的 m x n 整数矩阵：**
 **每行中的整数从左到右按非严格递增顺序排列。**
 **每行的第一个整数大于前一行的最后一个整数。**
@@ -1249,7 +1296,7 @@ class Solution:
         return False
 ```
 
-## [LC33. 搜索旋转排序数组](https://leetcode.cn/problems/search-in-rotated-sorted-array/description/?envType=problem-list-v2&envId=2cktkvj&)
+### [LC33. 搜索旋转排序数组](https://leetcode.cn/problems/search-in-rotated-sorted-array/description/?envType=problem-list-v2&envId=2cktkvj&)
 **整数数组 nums 按升序排列，数组中的值 互不相同 。**
 **在传递给函数之前，nums 在预先未知的某个下标 k（0 <= k < nums.length）上进行了 旋转，使数组变为 [nums[k], nums[k+1], ..., nums[n-1], nums[0], nums[1], ..., nums[k-1]]（下标 从 0 开始 计数）。**
 **给你 旋转后 的数组 nums 和一个整数 target ，如果 nums 中存在这个目标值 target ，则返回它的下标，否则返回 -1 。**
@@ -1286,5 +1333,87 @@ class Solution:
 
 ```
 
+
+## 并查集
+
+### 模板(带权值)
+```python
+class UnionFind:
+    def __init__(self, n):
+        self._fa = list(range(n))
+        self.dist = [0]*n  #dist[x]表示x到x所在集合的根节点的距离
+        self.cc = n  #连通块个数
+        self.size = [1]*n #连通块大小
+
+    def find(self, x):
+        if self._fa[x]!=x:
+            root = self.find(self._fa[x])
+            self.dist[x]+=self.dist[self._fa[x]]
+            self._fa[x] = root
+        return self._fa[x]
+    
+    def merge(self, x, y, value):
+        root_x, root_y = self.find(x), self.find(y)
+        if root_x==root_y:
+            return self.dist[x]-self.dist[y]==value
+        self._fa[root_x]=root_y
+        self.dist[root_x] = self.dist[y]+value-self.dist[x]
+        self.cc-=1
+        self.size[root_y]+=self.size[root_x]
+        return True
         
-            
+```
+
+
+## Dijkstra算法
+单源最短路径
+### 模板
+```python
+class Solution:
+    def dijkstra(self, n, edges, start):
+        g = [[] for _ in range(n)]
+        for x, y, wt in edges:
+            g[x].append((y,wt))
+            #g[y].append((x,wt))  #无向图
+        
+        dis = [inf]*n # 起点start到各个点的距离
+        dis[start] = 0 # 起点到自己的距离为0
+        h = [(0, start)] # 用堆保存（起点到x的最短路径， 节点x）
+        while h:
+            dis_x, x = heappop(h)
+            if dis_x>dis[x]:
+                continue
+            for y, wt in g[x]:
+                new_dis_y = dis_x+wt
+                if new_dis_y<dis[y]:
+                    dis[y] = new_dis_y #更新x的邻居的最短路径
+                    # 懒更新堆：只插入数据，不更新堆中数据
+                    # 相同节点可能有多个不同的new_dis_y, 除了最小的new_dis_y，其余值都会触发上面的continue
+                    heappush(h, (new_dis_y, y))
+        return dis
+```
+        
+
+## 数位DP
+### 模板[LC2376.统计特殊整数](https://leetcode.cn/problems/count-special-integers/description/?envType=problem-list-v2&envId=2cktkvj)
+```python
+class Solution:
+    def countSpecialNumbers(self, n: int) -> int:
+        s = str(n)
+        @cache
+        def dfs(i, mask, is_limit, is_num):
+            if i == len(s):
+                return int(is_num)
+            res = 0
+            if not is_num:
+                res = dfs(i+1, mask, False, False)
+            up = int(s[i]) if is_limit else 9
+            for d in range(1-int(is_num), up+1):
+                if mask>>d & 1==0:
+                    res += dfs(i+1, mask|(1<<d), is_limit and d==up, True)
+            return res
+        return dfs(0, 0, True, False)
+
+
+
+```
