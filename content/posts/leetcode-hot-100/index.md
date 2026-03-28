@@ -663,6 +663,37 @@ class Solution:
         return True
 ```
 
+### [LC210. 课程表II](https://leetcode.cn/problems/course-schedule-ii/description/?envType=problem-list-v2&envId=2cktkvj&)
+**你这个学期必须选修 numCourses 门课程，记为 0 到 numCourses - 1 。**
+**在选修某些课程之前需要一些先修课程。 先修课程按数组 prerequisites 给出，其中 prerequisites[i] = [ai, bi] ，表示如果要学习课程 ai 则 必须 先学习课程  bi 。**
+**例如，先修课程对 [0, 1] 表示：想要学习课程 0 ，你需要先完成课程 1 。**
+**请你返回一个可能的修完所有课程的顺序。如果不存在这样的顺序，返回一个空数组。**
+
+题解：拓扑排序
+```python
+class Solution:
+    def findOrder(self, numCourses: int, prerequisites: List[List[int]]) -> List[int]:
+        g = [[] for _ in range(numCourses)]
+        pre = [0]*numCourses
+        for x,y in prerequisites:
+            g[x].append(y)
+            pre[y]+=1
+        
+        ans = []
+        q = deque(i for i,d in enumerate(pre) if d==0)
+        while q:
+            x = q.popleft()
+            ans.append(x)
+            for y in g[x]:
+                pre[y]-=1
+                if pre[y]==0:
+                    q.append(y)
+
+        if len(ans)<numCourses:
+            return []
+        return ans[::-1]
+```
+
 ### [LC200.岛屿数量](https://leetcode.cn/problems/number-of-islands/description/?envType=problem-list-v2&envId=2cktkvj&)
 **给你一个由 '1'（陆地）和 '0'（水）组成的的二维网格，请你计算网格中岛屿的数量。**
 
@@ -1391,6 +1422,36 @@ class Solution:
                     # 相同节点可能有多个不同的new_dis_y, 除了最小的new_dis_y，其余值都会触发上面的continue
                     heappush(h, (new_dis_y, y))
         return dis
+```
+
+## FLoyd算法
+多源最短路径，本质是多维动态规划
+### 模板
+```python
+class Solution:
+    # 返回一个二维列表，其中 (i,j) 这一项表示从 i 到 j 的最短路长度
+    # 如果无法从 i 到 j，则最短路长度为 math.inf
+    # 允许负数边权
+    # 如果计算完毕后，存在 i，使得从 i 到 i 的最短路长度小于 0，说明图中有负环
+    # 节点编号从 0 到 n-1
+    # 时间复杂度 O(n^3 + m)，其中 m 是 edges 的长度
+    def floyd(self, n, edges):
+        f = [[inf]*n for _ in range(n)]
+        for i in range(n):
+            f[i][i]=0
+
+        for x,y,wt in edges:
+            f[x][y] = min(f[x][y], wt)
+            f[y][x] = min(f[x][y], wt) # 如果是无向图
+        
+        for k in range(n):
+            for i in range(n):
+                if f[i][k]==inf:
+                    continue
+                for j in range(n):
+                    f[i][j] = min(f[i][j], f[i][k]+f[k][j])
+        return f
+
 ```
         
 
