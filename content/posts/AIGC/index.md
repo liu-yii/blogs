@@ -394,15 +394,41 @@ $$
 
 7. 比较常见的LLM架构，例如Encoder-Only, Decoder-Only, Encoder-Decoder
     
-    - Encoder-Only: 去掉了 Transformer 的生成部分，只保留了用于理解输入内容的部分。通过Masked language modeling方法训练
+    - Encoder-Only: 去掉了 Transformer 的生成部分，只保留了用于理解输入内容的部分。通过Masked language modeling方法训练，Bert
 
-    - Decoder-Only：去除了专门的编码器，仅通过解码器来完成所有任务。采用了Causal Attention，每个token只能看到它自己和之前的token，不能看到未来的token。通过自回归的方式训练，即next-token prediction。
+    - Decoder-Only：去除了专门的编码器，仅通过解码器来完成所有任务。采用了Causal Attention，每个token只能看到它自己和之前的token，不能看到未来的token。通过自回归的方式训练，即next-token prediction。GPT以及之后的大模型
 
     - Encoder-Decoder: 同时包含编码器和解码器两部分，编码器负责理解输入内容，解码器负责生成输出内容。编码器和解码器之间通过Cross-Attention进行信息交互。通过seq2seq的方式进行训练。
 
     - 当前主流的架构是Decoder-Only，原因在于：1. scaling laws，研究发现，随着参数量和数据的增加，Decoder-Only 模型在“预测下一个词”这个简单任务上展现出了惊人的泛化能力（即“涌现能力”），足以覆盖几乎所有自然语言理解任务。2. 在底层算子优化、分布式训练以及推理加速方面更加高效。
 
+8. 手撕一下CLIP中InfoNCE Loss
+```python
+import torch
+import torch.nn.functional as F
 
+def InfoNCE_loss(image_feature, text_feature, logit_scale):
+    # 首先对image_feat和text_feat做L2 Norm，如果不做L2归一化，点积的结果可能会受到向量模长的影响，归一化将所有特征强行拉到一个超球面上，强制模型只能通过余弦相似度（向量夹角）来优化
+    image_feature_norm = F.normalize(image_feature, p=2, dim=-1)
+    text_feature_norm = F.normalize(text_feature, p=2, dim=-1)
+
+    # 余弦相似度计算
+    # logit_scale的作用：因为进行了归一化处理，余弦相似度的范围限制在[-1,1]，输入到softmax中会导致softmax的输出分布会非常平缓，loss梯度较小，模型很难学习。通过logit_scale将其放缩，可以拉伸logits的数值范围，提供足够大的梯度帮助模型学习。
+    logits_per_image = logit_scale*image_feature_norm@text_feature_norm.T
+    logits_per_text = logits_per_image.T
+
+    # 将位于对角线上的特征作为label
+    batch_size = image_feature.shape[0]
+    labels = torch.range(batch_size, dtype = torch.long device = image_feature.device())
+
+    # 计算交叉熵损失
+    loss_image = F.cross_entropy(logits_per_image, labels)
+    loss_text = F.cross_entropy(logits_per_text, labels)
+
+    # 最终损失为图像和文本损失的平均。如果只算单向损失会丢失信息，在对比学习中，不同方向构建的负样本空间是不一样的。双向计算可以保证无论从哪个模态出发，联合潜空间的对齐都是致密的。
+    loss = (loss_image+loss_text)/2
+    return loss
+```
 
 ## 强化学习
 1. RLHF
