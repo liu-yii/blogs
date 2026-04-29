@@ -35,6 +35,15 @@ DPO的核心思想是绕过传统的reward model和复杂的PPO强化学习阶�
 
 它通过损失函数拉大模型生成chosen回复和rejected回复的概率差，避免了PPO训练时的在线采样成本以及Actor-Critic架构的崩溃风险。
 
+```python
+def dpo_loss(chosen_logp, rejected_logp, chosen_ref_logp, rejected_ref_logp, beta=0.1):
+    chosen_logratio = chosen_logp-chosen_ref_logp
+    rejected_logratio = rejected_logp-rejected_ref_logp
+    logratio = chosen_logratio-rejected_logratio
+    loss = -F.logsigmoid(beta*logratio)
+    return loss.mean()
+```
+
 ### GRPO（Group Relative Policy Optimization）
 GRPO针对同一个输入Prompt，让Actor模型一次性采样生成一组（Group）多个不同的回复，然后通过Reward Model或基于规则的验证器对这组回复分别计算奖励得分。
 

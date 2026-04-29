@@ -441,6 +441,84 @@ def InfoNCE_loss(image_feature, text_feature, logit_scale):
     return loss
 ```
 
+9. 手撕Lora
+```python
+import torch
+import torch.nn as nn
+import math
+
+class LoraLinear(nn.Module):
+    def __init__(self, in_dim, out_dim, r, alpha,bias=True):
+        super().__init__()
+        self.in_dim = in_dim
+        self.out_dim = out_dim
+        self.r = r
+        self.alpha = alpha    
+        self.scale = self.alpha / self.r
+        
+        self.linear = nn.Linear(in_dim, out_dim, bias=bias)
+        self.lora_a = nn.Linear(in_dim, r, bias=False)
+        self.lora_b = nn.Linear(r, out_dim, bias=False)
+        self._init_weights()
+        
+        # 冻结原始权重
+        self.linear.weight.requires_grad = False
+        if self.linear.bias is not None:
+            self.linear.bias.requires_grad = False
+
+    def _init_weights(self):
+        nn.init.kaiming_uniform_(self.lora_a.weight, a=math.sqrt(5))
+        nn.init.zeros_(self.lora_b.weight)
+
+    def forward(self, x):
+        original_output = self.linear(x)
+        lora_output = self.lora_b(self.lora_a(x)) * self.scale
+        return original_output + lora_output                          
+```
+
+10. 手撕SwiGLU
+```python
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+
+class SwiGLU(nn.Module):
+    def __init__(self, hidden_dim, inter_dim, bias = False):
+        super().__init__()
+        self.gate_proj = nn.Linear(hidden_dim, inter_dim, bias=bias)
+        self.up_proj = nn.Linear(hidden_dim, inter_dim, bias=bias)
+        self.down_proj = nn.Linear(inter_dim, hidden_dim, bias = bias)
+    
+    def forward(self, x):
+        return self.down_proj(F.silu(self.gate_proj(x))*self.up_proj(x))
+
+```
+
+11. 手撕MoE
+```python
+
+class MoELayer(nn.Module):
+    def __init__(self, num_experts, hidden_size, expert_size, k=2):
+        super().__init__()
+        self.k = k
+        self.experts = nn.ModuleList([FeedForward(hidden_size, expert_size) for _ in range(num_experts)])
+        self.gate = nn.Linear(hidden_size, num_experts)
+
+    def forward(self, x):
+        b,seq_len, hidden_dim = x.shape
+        x_flat = x.view(-1, hidden_dim)
+        scores = F.softmax(self.gate(x_flat), dim=-1)
+        topk_values, topk_indices = torch.topk(scores, k=self.k, dim=-1)
+        y = torch.zeros_like(x_flat)
+        for i, expert in enumerate(self.experts):
+            mask = (topk_indices==i)
+            if mask.any():
+                token_idx = mask.any(dim=-1).nonzero().flatten()
+                weight = topk_weight[mask].view(-1, 1)
+                y.index_add_(0, token_idx, (expert(x_flat[token_idx]) * weight).to(y.dtype))
+        return y.view(b, seq_len, hidden_dim)
+```
+
 ## 强化学习
 1. RLHF
 

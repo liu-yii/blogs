@@ -1478,3 +1478,29 @@ class Solution:
 
 
 ```
+
+
+## LRU缓存
+### 模板[LC146. LRU缓存机制](https://leetcode.cn/problems/lru-cache/description/?envType=problem-list-v2&envId=2cktkvj)
+```python
+class LRUCache:
+
+    def __init__(self, capacity: int):
+        self.capacity = capacity
+        self.cache = OrderedDict()
+
+    def get(self, key: int) -> int:
+        if key not in self.cache:
+            return -1
+        self.cache.move_to_end(key, last = False)
+        return self.cache[key]
+        
+
+    def put(self, key: int, value: int) -> None:
+        self.cache[key] = value
+        self.cache.move_to_end(key, last = False)
+        if len(self.cache)>self.capacity:
+            self.cache.popitem()
+        
+
+```
