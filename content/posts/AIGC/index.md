@@ -363,7 +363,7 @@ class RotaryEmbedding(nn.Module):
 
     def _compute_embedding(self):
         pos = torch.arrange(self.max_len).float()
-        theta_i = torch.exp(torch.arrange(0, self.head_dim, 2).float()*(-math.log(base)/self.head_dim))
+        theta_i = torch.exp(torch.arrange(0, self.head_dim, 2).float()*(-math.log(self.base)/self.head_dim))
         pos_emb = pos.unsqueeze(1)*theta_i.unsqueeze(0)
 
         cos_pos = pos_emb.cos().repeat_interleave(2, dim=-1)
@@ -508,7 +508,7 @@ class MoELayer(nn.Module):
         b,seq_len, hidden_dim = x.shape
         x_flat = x.view(-1, hidden_dim)
         scores = F.softmax(self.gate(x_flat), dim=-1)
-        topk_values, topk_indices = torch.topk(scores, k=self.k, dim=-1)
+        topk_weight, topk_indices = torch.topk(scores, k=self.k, dim=-1)
         y = torch.zeros_like(x_flat)
         for i, expert in enumerate(self.experts):
             mask = (topk_indices==i)

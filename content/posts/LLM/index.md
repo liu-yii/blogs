@@ -51,9 +51,30 @@ GRPO针对同一个输入Prompt，让Actor模型一次性采样生成一组（Gr
 
 最后，GRPO利用这个相对优势值，结合参考模型的KL散度惩罚和clip操作来更新Actor模型。
 
+```python
+def grpo_loss(rewards, logp_per_token, ref_logp_per_token, old_logp_per_token, mask=None, beta=0.01, clip_eps=0.2):
+    mean_rewards = rewards.mean(dim=-1, keepdim=True)
+    std_rewards = rewards.std(dim=-1, keepdim=True)
+    advantages = (rewards - mean_rewards) / (std_rewards + 1e-8)
+    advantages_per_token = advantages.unsqueeze(-1)
+
+    ratio = torch.exp(logp_per_token-old_logp_per_token)
+    adv1 = ratio*advantages_per_token*advantages_per_token
+    adv2 = torch.clamp(ratio, 1-clip_eps, 1+clip_eps)*advantages_per_token
+    
+    kl_per_token = torch.exp(ref_logp_token-logp_per_token)-(ref_logp_token-logp_per_token)-1
+
+    loss_per_token = -(torch.min(adv1, adv2) - beta*kl_per_token)
+    policy_loss = (loss_per_token*mask).sum(dim=-1)/mask.sum(dim=-1)
+    return policy_loss.mean()
+```
+
 ### DAPO（Decoupled clip and Dynamic sAmpling Policy Optimization）
 DAPO相较于GRPO有四个改进：
 1. higher clip：DAPO提高了clip的upper阈值，提高策略的多样性
 2. dynamic sampling：为了避免遇到较难的问题或者较简单的问题GRPO组内相对优势较小的情况（Zero-Variance），DAPO提出动态采样机制，强制组内答案的奖励方差不为0
 3. token level策略梯度损失：GRPO采用seq-level的梯度损失，对于高质量长序列的回答，其梯度比率较小，阻碍了模型学习其中的逻辑，而对于存在reward hacking的输出，样本级的损失无法有效地惩罚这种不良模式。DAPO将GRPO原先在句子级别求平均的损失计算改为了Token级别的直接聚合，解决了高质量的长序列推理步骤在梯度更新时梯度权重被过度稀释的偏差问题。
 4. Overlong reward shaping：在计算损失时直接剔除被强制截断的噪声样本，并引入阶梯式的长度软惩罚，引导模型精准控制输出长度。
+
+### GSPO(Group Sequence Policy Optimization)
+GSPO与GRPO最大的不同之处在于其在序列级别计算重要性采样比率，并且进行序列级别的clip以及奖励和优化。
