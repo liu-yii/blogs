@@ -55,9 +55,9 @@ $$\frac{\partial L}{\partial N} \bigg/ \frac{\partial L}{\partial D} = \frac{\pa
 
 代入损失函数的幂律形式求解，可得：
 
-$$N^* \approx \left(\frac{\alpha\_N}{\alpha\_D} \cdot \frac{C}{6}\right)^{\frac{\alpha\_N \alpha\_D}{\alpha\_N + \alpha\_D}},\quad D^* \approx \left(\frac{\alpha\_D}{\alpha\_N} \cdot \frac{C}{6}\right)^{\frac{\alpha\_N \alpha\_D}{\alpha\_N + \alpha\_D}}$$
+$$N^{*} \approx \left(\frac{\alpha\_N}{\alpha\_D} \cdot \frac{C}{6}\right)^{\frac{\alpha\_N \alpha\_D}{\alpha\_N + \alpha\_D}},\quad D^{*} \approx \left(\frac{\alpha\_D}{\alpha\_N} \cdot \frac{C}{6}\right)^{\frac{\alpha\_N \alpha\_D}{\alpha\_N + \alpha\_D}}$$
 
-当 $\alpha\_N \approx \alpha\_D$（Chinchilla 的测量结果）时，两者指数退化为 $0.5$，即 $N^* \approx D^* \propto C^{0.5}$。
+当 $\alpha\_N \approx \alpha\_D$（Chinchilla 的测量结果）时，两者指数退化为 $0.5$，即 $N^{*} \approx D^{*} \propto C^{0.5}$。
 
 **Kaplan vs Chinchilla 核心差异**：
 
@@ -326,13 +326,13 @@ $$R\_{\text{total}}(L) = R\_{\text{acc}}(L) - \lambda \cdot L$$
 
 其中 $R\_{\text{acc}}(L)$ 通常是 $L$ 的凹函数——推理长度带来的精度提升存在边际递减效应（前200个推理token可能大幅提升准确率，之后每增加100个token的边际收益迅速衰减）。$\lambda$ 是长度惩罚系数，控制 cost-accuracy trade-off 的斜率。
 
-**最优推理长度的求解**：在给定问题难度下，最优推理长度 $L^*$ 应满足一阶条件：
+**最优推理长度的求解**：在给定问题难度下，最优推理长度 $L^{*}$ 应满足一阶条件：
 
-$$\frac{\partial R\_{\text{acc}}}{\partial L}\bigg|\_{L=L^*} = \lambda$$
+$$\frac{\partial R\_{\text{acc}}}{\partial L}\bigg|\_{L=L^{*}} = \lambda$$
 
 即当推理的边际精度收益恰好等于边际成本时，总效用最大。实践中 $R\_{\text{acc}}(L)$ 的具体函数形式取决于模型能力和任务难度——对简单问题，$R\_{\text{acc}}(L)$ 在很小的 $L$ 处就接近饱和；对复杂问题，$R\_{\text{acc}}(L)$ 可能持续增长数百至数千个token。
 
-这一公式也解释了**动态推理预算**的动机：当模型能准确估计问题难度时，可自适应选择 $L^*$——简单问题 $L^* \approx 0$（跳过推理，即System 1），中等难度 $L^* = 200\sim500$，高难度 $L^* = 2000+$。
+这一公式也解释了**动态推理预算**的动机：当模型能准确估计问题难度时，可自适应选择 $L^{*}$——简单问题 $L^{*} \approx 0$（跳过推理，即System 1），中等难度 $L^{*} = 200\sim500$ ，高难度 $L^{*} = 2000+$。
 
 Efficient Reasoning方法：长推理链虽然准确，但对简单问题会产生大量冗余token，增加推理延迟和计算成本。高效推理的目标是在保证质量的前提下降低推理开销，主要方法包括：
 1. **动态推理预算（Thinking Budget）**：根据问题难度动态调整推理链长度，对简单问题缩短推理过程，对复杂问题保持完整推理。数学上等价于对每个查询求解 $\arg\max\_L [R\_{\text{acc}}(L|x) - \lambda L]$，其中 $R\_{\text{acc}}(L|x)$ 为条件于问题 $x$ 的精度函数。Claude 3.7 引入了 Extended Thinking 的预算控制机制，可在准确性与延迟之间灵活权衡。
@@ -398,7 +398,7 @@ $$R = \underbrace{R\_{\text{acc}}}\_{\text{答案正确性}} - \lambda \cdot \un
 
 训练过程：对每个 prompt 随机分配不同的 $L\_{\text{target}}$（如 {500, 1000, 2000, 4000}），让模型在单一训练过程中学会跨预算的泛化推理能力。RL 优化后，模型自发涌现出**自适应计算分配**的模式——简单步骤少写 token，复杂步骤多写 token，遇到瓶颈时主动回溯。
 
-**与「推理长度经济学」的内在联系**：推理长度经济学从推理时（inference-time）角度分析给定问题的 $L^*$ 求解问题（$\frac{\partial R}{\partial L} = \lambda$），而 Budget Forcing 是从训练时（training-time）角度直接教会模型自己做这个优化——模型不再需要外部设定长度，而通过 RL 内化了「在预算边界下最大化正确率」的策略。**二者是同一原理的推理端与训练端实现**。
+**与「推理长度经济学」的内在联系**：推理长度经济学从推理时（inference-time）角度分析给定问题的 $L^{*}$ 求解问题（$\frac{\partial R}{\partial L} = \lambda$），而 Budget Forcing 是从训练时（training-time）角度直接教会模型自己做这个优化——模型不再需要外部设定长度，而通过 RL 内化了「在预算边界下最大化正确率」的策略。**二者是同一原理的推理端与训练端实现**。
 
 #### 5. Scaling Paradox：为什么「多想一会」能超越「模型做大」？
 
@@ -495,7 +495,7 @@ $$\bar{r}(y) = \text{Agg}(r\_1(y), r\_2(y), ..., r\_M(y))$$
 
 **(a) Bradley-Terry模型是DPO的隐式数据模型**：DPO之所以能跳过显式RM训练，是因为其损失函数直接从BT模型推导而来。DPO的损失函数 $\mathcal{L}\_{\text{DPO}} = -\log \sigma(\beta(\log \frac{\pi\_\theta(y\_w)}{\pi\_{\text{ref}}(y\_w)} - \log \frac{\pi\_\theta(y\_l)}{\pi\_{\text{ref}}(y\_l)}))$ 本质上是用策略模型自身隐式地参数化了奖励函数 $r\_\theta(y) = \beta \log \frac{\pi\_\theta(y)}{\pi\_{\text{ref}}(y)}$——这是BT模型在策略空间的对偶形式。DPO的简洁正是建立在BT偏好假设成立的前提之上。
 
-**(b) RM质量直接决定PPO/GRPO的最终质量——奖励天花板**：策略优化的目标函数是 $\max\_\theta \mathbb{E}\_{y \sim \pi\_\theta}[r\_\phi(y)]$。若 $r\_\phi$ 与真实人类偏好 $r^*$ 存在系统性偏差 $\Delta r(y) = r\_\phi(y) - r^*(y)$，则最优策略将收敛到最大化 $r^* + \Delta r$ 的方向。策略优化算法（PPO/GRPO/DAPO）只能保证收敛到RM眼中的最优，无法超越RM的认知上限——**RM的偏差就是最终策略的偏差上界**。
+**(b) RM质量直接决定PPO/GRPO的最终质量——奖励天花板**：策略优化的目标函数是 $\max\_\theta \mathbb{E}\_{y \sim \pi\_\theta}[r\_\phi(y)]$。若 $r\_\phi$ 与真实人类偏好 $r^{*}$ 存在系统性偏差 $\Delta r(y) = r\_\phi(y) - r^{*}(y)$，则最优策略将收敛到最大化 $r^{*} + \Delta r$ 的方向。策略优化算法（PPO/GRPO/DAPO）只能保证收敛到RM眼中的最优，无法超越RM的认知上限——**RM的偏差就是最终策略的偏差上界**。
 
 **(c) PRM是Agentic RL信用分配的关键**：Agentic RL面临的核心难题之一是将稀疏的轨迹级奖励分解为步骤级信号。PRM直接提供步骤级奖励 $r(s\_t)$，将信用分配从「回溯性推断」转化为「前瞻性评估」——每一步执行后立刻获得质量反馈。这大幅缓解了前文Agentic RL章节中分析的长程因果信号衰减问题（$O(\lambda^T)$ 衰减）。PRM与GAE的关系：GAE用时间衰减加权解决信用分配，PRM用步骤级模型预测直接替代衰减——**PRM提供了更准确的 $V(s\_t)$ 先验**，使GAE的TD误差 $\delta\_t$ 的估计方差显著降低。
 
@@ -507,7 +507,7 @@ $$\bar{r}(y) = \text{Agg}(r\_1(y), r\_2(y), ..., r\_M(y))$$
 
 SFT与RL并非两种截然不同的范式，从优化目标出发，二者可以统一在同一个数学框架下理解。
 
-**SFT的本质是行为克隆（Behavior Cloning, BC）**：给定专家数据集 $\mathcal{D} = \{(x, y^*)\}$，SFT通过最大化条件对数似然 $\max\_\theta \mathbb{E}\_{(x,y^*)\sim\mathcal{D}}[\log \pi\_\theta(y^*|x)]$ 来训练策略。这等价于在专家状态分布上进行监督学习——模型只见过专家的"正确路径"，从未被要求评估或比较其他候选回复。**SFT的优势在于训练稳定**（目标函数为凸优化问题，梯度方向明确），但**致命缺陷是分布外（OOD）崩塌**：当推理时遇到训练分布未覆盖的输入模式，模型的行为完全不可控，容易产生幻觉或低质量回复。
+**SFT的本质是行为克隆（Behavior Cloning, BC）**：给定专家数据集 $\mathcal{D} = \{(x, y^{*})\}$，SFT通过最大化条件对数似然 $\max\_\theta \mathbb{E}\_{(x,y^{*})\sim\mathcal{D}}[\log \pi\_\theta(y^{*}|x)]$ 来训练策略。这等价于在专家状态分布上进行监督学习——模型只见过专家的"正确路径"，从未被要求评估或比较其他候选回复。**SFT的优势在于训练稳定**（目标函数为凸优化问题，梯度方向明确），但**致命缺陷是分布外（OOD）崩塌**：当推理时遇到训练分布未覆盖的输入模式，模型的行为完全不可控，容易产生幻觉或低质量回复。
 
 **RL的做法是奖励驱动的最优策略搜索**：引入奖励函数 $r(x,y)$（来自Reward Model或规则验证器），优化目标变为 $\max\_\theta \mathbb{E}\_{x\sim\mathcal{D}, y\sim\pi\_\theta(\cdot|x)}[r(x,y)]$。RL允许模型**主动探索**——对同一输入采样多条不同的输出，通过奖励信号区分优劣，再用策略梯度（Policy Gradient）的方式将高奖励输出的概率推高。**重要性采样（Importance Sampling）** 是实现这一目标的核心数学工具：
 
@@ -519,7 +519,7 @@ $$\max\_\theta \mathbb{E}\_{x,y\sim\pi\_{\theta\_{\text{old}}}} \left[ \frac{\pi
 
 | 维度 | SFT (MLE / BC) | RL (Policy Optimization) |
 |------|---------------|--------------------------|
-| 优化目标 | $\max \log\pi(y^*|x)$ | $\max \mathbb{E}[r(x,y)]$ |
+| 优化目标 | $\max \log\pi(y^{*}|x)$ | $\max \mathbb{E}[r(x,y)]$ |
 | 数据来源 | 固定离线数据集 | 当前策略在线采样 |
 | 分布覆盖 | 仅专家分布 | 完整策略分布（含探索） |
 | OOD鲁棒性 | 差（崩塌） | 好（奖励提供 guard） |
