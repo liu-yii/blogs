@@ -81,7 +81,7 @@ f(q,m) = \begin{pmatrix}
   \sin m\theta & \cos m\theta
 \end{pmatrix}
 \begin{pmatrix}
-  q_0 \\
+  q_0 \\\\
   q_1
 \end{pmatrix}
 $$
