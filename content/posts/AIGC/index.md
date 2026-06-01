@@ -436,7 +436,7 @@ def InfoNCE_loss(image_feature, text_feature, logit_scale):
 
     # 将位于对角线上的特征作为label
     batch_size = image_feature.shape[0]
-    labels = torch.range(batch_size, dtype = torch.long device = image_feature.device())
+    labels = torch.arange(batch_size, dtype = torch.long device = image_feature.device())
 
     # 计算交叉熵损失
     loss_image = F.cross_entropy(logits_per_image, labels)
